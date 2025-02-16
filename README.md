@@ -57,8 +57,3 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
  
-
-How to run:
-cd C:\Users\mebloya\Desktop\toDel\testNewApp\1\hebrew-reading-app
-npm run build  
-npx live-server
