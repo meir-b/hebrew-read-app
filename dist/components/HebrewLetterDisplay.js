@@ -1,32 +1,25 @@
 import { HebrewLetterGenerator, NIKUD_LIST } from '../utils/letterUtils.js';
-
 class HebrewLetterDisplay {
     constructor(statistics) {
-        this.nikudList = NIKUD_LIST;
         this.statistics = statistics;
         this.currentLetter = HebrewLetterGenerator.generateNextCharacter();
     }
-
-    static getNikudName(nikud) {
-        return this.nikudList.get(nikud) ?? "Unknown Nikud";
-    }
-
     getNikudList() {
-        return this.nikudList;
+        return NIKUD_LIST;
     }
-
     getCurrentLetter() {
-        const { charector, nikud } = this.currentLetter;
-        return { charector, nikud: getNikudName(nikud)}; // Return a copy to prevent external modification 
+        return Object.assign({}, this.currentLetter); // Return a copy to prevent external modification
     }
-
+    getNikudName(nikud) {
+        const found = NIKUD_LIST.find(item => item.nikud === nikud);
+        return found ? found.name : "Unknown Nikud";
+    }
     updateDisplayedLetter() {
         const weights = this.calculateNikudWeights();
         console.log("weights:", weights);
-        this.currentLetter = HebrewLetterGenerator.generateNextCharacter(); //weights);
+        this.currentLetter = HebrewLetterGenerator.generateNextCharacter(weights);
         this.render();
     }
-
     calculateNikudWeights() {
         const performance = this.statistics.calculateOverallPerformance();
         console.log("performance:", performance);
@@ -37,7 +30,7 @@ class HebrewLetterDisplay {
     }
     findLeastPracticedNikud() {
         var _a;
-        const nikudCounts = this.nikudList.map(n => {
+        const nikudCounts = NIKUD_LIST.map(n => {
             var _a, _b;
             return ({
                 nikud: n.nikud,

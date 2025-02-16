@@ -1,5 +1,5 @@
 import { Statistics } from '../models/Statistics.js';
-import { HebrewLetterGenerator, CharectorNikud, getNikudNameToStr } from '../utils/letterUtils.js';
+import { HebrewLetterGenerator, CharectorNikud, NIKUD_LIST } from '../utils/letterUtils.js';
 
 interface NikudInfo {
     nikud: string;
@@ -18,35 +18,28 @@ class HebrewLetterDisplay {
     private static readonly DIFFICULTY_THRESHOLD = 0.6;
     private static readonly MIN_EXPOSURE_COUNT = 5;
 
-    private readonly nikudList: readonly NikudInfo[] = [
-        { nikud: getNikudNameToStr("Sheva"), name: "Sheva" },
-        { nikud: getNikudNameToStr("Hiriq"), name: "Hiriq" },
-        { nikud: getNikudNameToStr("Tsere"), name: "Tsere" },
-        { nikud: getNikudNameToStr("Segol"), name: "Segol" },
-        { nikud: getNikudNameToStr("Patah"), name: "Patah" },
-        { nikud: getNikudNameToStr("Qamats"), name: "Qamats" },
-        { nikud: getNikudNameToStr("Holam"), name: "Holam" },
-        { nikud: getNikudNameToStr("FullShuruk"), name: "Shuruk" },
-        { nikud: getNikudNameToStr("FullHolam"), name: "Holam Malei" }
-    ] as const;
-
     constructor(statistics: Statistics) {
         this.statistics = statistics;
         this.currentLetter = HebrewLetterGenerator.generateNextCharacter();
     }
 
     public getNikudList(): readonly NikudInfo[] {
-        return this.nikudList;
+        return NIKUD_LIST;
     }
 
     public getCurrentLetter(): CharectorNikud {
         return { ...this.currentLetter }; // Return a copy to prevent external modification
     }
 
+    private getNikudName(nikud: string): string {
+        const found = NIKUD_LIST.find(item => item.nikud === nikud);
+        return found ? found.name : "Unknown Nikud";
+    }
+
     public updateDisplayedLetter(): void {
         const weights = this.calculateNikudWeights();
         console.log("weights:", weights);
-        this.currentLetter = HebrewLetterGenerator.generateNextCharacter(); //weights);
+        this.currentLetter = HebrewLetterGenerator.generateNextCharacter(weights);
         this.render();
     }
 
@@ -66,7 +59,7 @@ class HebrewLetterDisplay {
    
 
     private findLeastPracticedNikud(): string | null {
-        const nikudCounts = this.nikudList.map(n => ({
+        const nikudCounts = NIKUD_LIST.map(n => ({
             nikud: n.nikud,
             total: this.statistics.getStatistics(n.nikud)?.total ?? 0
         }));
