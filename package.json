@@ -1,0 +1,30 @@
+{
+  "name": "hebrew-reading-app",
+  "version": "1.0.0",
+  "description": "An application to teach reading Hebrew letters with Nikud, incorporating assessment and game-like features.",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "ts-node": "^10.0.0",
+    "typescript": "^4.0.0",
+    "jest": "^27.0.0",
+    "ts-jest": "^27.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.0",
+    "@types/node": "^16.0.0"
+  }, 
+  "keywords": [
+    "hebrew",
+    "reading",
+    "education",
+    "children",
+    "nikud"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
