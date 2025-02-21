@@ -3,343 +3,933 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hebrew Reading App</title>
+    <title>לומדים לקרוא - משחק ניקוד</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Root Variables */
+        :root {
+            --color-red: #FF6B6B;
+            --color-orange: #FFA06E;
+            --color-yellow: #FFD93D;
+            --color-green: #6BCB77;
+            --color-blue: #4D96FF;
+            --color-purple: #9B72AA;
+            --primary-color: var(--color-blue);
+            --primary-light: #78B4FF;
+            --success-color: var(--color-green);
+            --error-color: var(--color-red);
+            --background-start: #FFF9E6;
+            --background-end: #FFE5E5;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-border: rgba(148, 163, 184, 0.1);
+            --card-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --letter-color: #000000;
+        }
+
+        /* Base Styles */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f7ff;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 2rem;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            gap: 2rem;
+            background: 
+                radial-gradient(circle at 20% 20%, var(--background-start) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, var(--background-end) 0%, transparent 50%),
+                linear-gradient(135deg, #FFE0B2 0%, #FFE0B2 100%);
+            animation: backgroundShift 20s ease-in-out infinite alternate;
+            color: var(--text-primary);
         }
 
-        .sound-container {
-        display: none;
-    }
-
+        /* Display Area */
         #display-area {
-    font-size: 180px;
-    text-align: center;
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    margin: 20px;
-    min-width: 300px;
-    height: 450px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.letter-display {
-    height: 180px;
-    width: 100%;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    position: relative;
-    /*margin-bottom: 0.1cm;   Reduced spacing */
-}
-
-.nikud-display {
-    position: absolute;
-    top: calc(100% - 8cm);  /* Reduced gap */
-    left: 48%;
-    transform: translateX(-50%);
-    font-size: 100px;
-    color: #333;
-    width: 100%;
-    height: 60px;  /* Reduced height */
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-}
-
-
-/* Special positioning for Holam */
-.nikud-display.holam-position {
-        top: 4cm;  /* Position above the letter */
-        left: 35%;    /* Slightly to the left */
-        transform: translateX(-50%) translateY(0);
-    }
- 
-    /* Special positioning for Shuruk */
-    .nikud-display.shuruk-position {
-        height: 180px !important; /* Not Working */
-        /*top: 40%;     /* Vertically center */
-        left: -2cm; /* Position to the left of the letter */
-        transform: translate(0, -50%);
-        align-items: center;  /* Center vertically */
-    }
-
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        button {
-            padding: 15px 30px;
-            font-size: 18px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        .correct-btn {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .incorrect-btn {
-            background-color: #f44336;
-            color: white;
-        }
-
-        button:hover {
-            transform: scale(1.05);
-        }
-
-        .stats {
-            margin-top: 20px;
-            padding: 20px;
+            font-size: 12rem;
+            padding: 3rem;
+            border-radius: 3rem;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 8px solid var(--color-yellow);
+            box-shadow: 
+                0 0 0 4px white,
+                0 20px 40px rgba(0, 0, 0, 0.1);
+            min-width: 400px;
+            height: 500px;
+            display: grid;
+            place-items: center;
+            transform-style: preserve-3d;
+            transition: var(--transition);
+            position: relative;
+            overflow: visible;
         }
 
-        .counter {
-            font-size: 24px;
-            color: #333;
-            margin-top: 20px;
+        #display-area::before,
+        #display-area::after {
+            content: '✨';
+            position: absolute;
+            font-size: 2rem;
+            animation: twinkle 1.5s ease-in-out infinite alternate;
         }
 
-        .debug {
-            display: none;
+        #display-area::before {
+            top: -1rem;
+            left: -1rem;
         }
 
-/* Streak */
-@keyframes streakAnimation3 {
-        0% { transform: scale(1); background: white; }
-        50% { transform: scale(1.1); background: linear-gradient(45deg, #ff4081, #7c4dff); }
-        100% { transform: scale(1); background: white; }
-    }
-
-    @keyframes streakAnimation6 {
-        0% { transform: scale(1) rotate(0deg); }
-        25% { transform: scale(1.15) rotate(-5deg); background: linear-gradient(45deg, #FFD700, #FFA500); }
-        75% { transform: scale(1.15) rotate(5deg); background: linear-gradient(45deg, #FFA500, #FF6347); }
-        100% { transform: scale(1) rotate(0deg); }
-    }
-
-    @keyframes streakAnimation9 {
-        0% { transform: scale(1); filter: brightness(1); }
-        25% { transform: scale(1.2) rotate(-5deg); filter: brightness(1.2); background: linear-gradient(45deg, #4CAF50, #2196F3); }
-        50% { transform: scale(1.2) rotate(5deg); filter: brightness(1.4); background: linear-gradient(45deg, #2196F3, #9C27B0); }
-        75% { transform: scale(1.2) rotate(-5deg); filter: brightness(1.2); background: linear-gradient(45deg, #9C27B0, #4CAF50); }
-        100% { transform: scale(1); filter: brightness(1); }
-    }
-
-    .streak-animation-3 {
-        animation: streakAnimation3 1s ease-in-out;
-    }
-
-    .streak-animation-6 {
-        animation: streakAnimation6 1.2s ease-in-out;
-    }
-
-    .streak-animation-9 {
-        animation: streakAnimation9 1.5s ease-in-out;
-    }
-
-    .streak-milestone {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 48px;
-        color: #fff;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        pointer-events: none;
-        z-index: 1000;
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    @keyframes milestoneAnimation {
-        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-        50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-        100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
-    }
-
-    .milestone-show {
-        animation: milestoneAnimation 1.5s ease-out forwards;
-    }
-
-    /* --------------------- */
-
-    /* learnign feedback */
-
-    .learning-feedback {
-        font-size: 24px;
-        color: #666;
-        text-align: center;
-        margin-top: 20px;
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    .learning-feedback.show {
-        opacity: 1;
-    }
-
-    .mastery-indicator {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        margin-left: 10px;
-    }
-
-    .mastery-low { background-color: #ff4081; }
-    .mastery-medium { background-color: #FFA500; }
-    .mastery-high { background-color: #4CAF50; }
-
-    /* -------------  stats ---------*/
-
-    .statistics-panel {
-        margin-top: 20px;
-        padding: 20px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        max-width: 600px;
-        width: 100%;
-    }
-
-    .statistics-panel h3 {
-        text-align: center;
-        color: #333;
-        margin-bottom: 15px;
-    }
-
-    .nikud-stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 10px;
-        padding: 10px;
-    }
-
-    .nikud-stat-item {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 10px;
-        text-align: center;
-    }
-
-    .nikud-symbol {
-        font-size: 32px;
-        color: #333;
-        margin-bottom: 5px;
-    }
-
-    .nikud-name {
-        font-size: 14px;
-        color: #666;
-        margin-bottom: 5px;
-    }
-
-    .nikud-progress {
-        width: 100%;
-        height: 6px;
-        background: #e9ecef;
-        border-radius: 3px;
-        margin: 5px 0;
-        overflow: hidden;
-    }
-
-    .nikud-progress-bar {
-        height: 100%;
-        background: linear-gradient(45deg, #4CAF50, #45a049);
-        transition: width 0.3s ease;
-    }
-
-    .nikud-stats {
-        font-size: 12px;
-        color: #666;
-    }
-
-    .success-rate {
-        color: #4CAF50;
-        font-weight: bold;
-    }
-/* -------------------  */
-
-    #display-area {
-        transition: all 0.3s ease-in-out;
-    }
-
-    .letter-display, .nikud-display {
-        transition: all 0.3s ease-in-out;
-    }
-
-        @media (max-width: 600px) {
-        #display-area {
-            height: 300px;
-            font-size: 80px;
-            padding: 20px;
+        #display-area::after {
+            bottom: -1rem;
+            right: -1rem;
         }
 
         .letter-display {
-            height: 150px;
+            font-size: 1em;
+            color: var(--letter-color);
+            position: relative;
+            z-index: 2;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
         }
 
-        .nikud-display {
-            font-size: 60px;
-            height: 60px;
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
-    }
+
+        button {
+            padding: 1.5rem 3rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 2rem;
+            cursor: pointer;
+            color: white;
+            min-width: 200px;
+            transform-style: preserve-3d;
+            transition: var(--transition);
+        }
+
+        .correct-btn {
+            background: linear-gradient(135deg, var(--color-green), #8BC34A);
+            box-shadow: 
+                0 8px 0 #2E7D32,
+                0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .incorrect-btn {
+            background: linear-gradient(135deg, var(--color-red), var(--color-orange));
+            box-shadow: 
+                0 8px 0 #C62828,
+                0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        button:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 0 #2E7D32;
+        }
+
+        /* Success Messages */
+        .success-message {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--color-yellow), var(--color-orange));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-size: 3rem;
+            font-weight: bold;
+            border: 4px solid white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: successPopup 1.5s ease-out forwards;
+            z-index: 1000;
+        }
+
+        /* Streak Counter */
+        .streak-counter {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            background: linear-gradient(
+                45deg,
+                var(--color-red),
+                var(--color-orange),
+                var(--color-yellow),
+                var(--color-green),
+                var(--color-blue),
+                var(--color-purple)
+            );
+            background-size: 200% 200%;
+            animation: rainbow 2s linear infinite;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-size: 2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 4px solid white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1001;
+        }
+
+        .settings-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .settings-content {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            min-width: 300px;
+            transform: scale(0.95);
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .settings-content.show {
+            transform: scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Animations */
+        @keyframes backgroundShift {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        @keyframes twinkle {
+            from { opacity: 0.5; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1.1); }
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        @keyframes successPopup {
+            0% { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+            20% { transform: translateX(-50%) translateY(0); opacity: 1; }
+            80% { transform: translateX(-50%) translateY(0); opacity: 1; }
+            100% { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            #display-area {
+                font-size: 8rem;
+                padding: 2rem;
+                height: 350px;
+                min-width: unset;
+                width: 90%;
+            }
+
+            .controls {
+                flex-direction: column;
+                width: 90%;
+            }
+
+            button {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+
+
+        /* Add these new style sections */
+        .achievement-banner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, var(--color-yellow), var(--color-orange));
+            padding: 2rem;
+            border-radius: 1.5rem;
+            color: white;
+            text-align: center;
+            animation: achievementPopup 2s forwards;
+            z-index: 1000;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 6px solid white;
+            font-size: 2.5rem;
+        }
+
+        .achievement-banner h2 {
+            margin: 0;
+            padding-bottom: 1rem;
+        }
+
+        .achievement-banner p {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .success-stars {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .success-stars.left { left: 2rem; }
+        .success-stars.right { right: 2rem; }
+
+        .confetti {
+            position: fixed;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            animation: confettiFall 2s ease-in-out forwards;
+        }
+
+        .streak-milestone {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-2deg);
+            background: linear-gradient(135deg, var(--color-purple), var(--color-blue));
+            color: white;
+            padding: 2rem 4rem;
+            border-radius: 1rem;
+            font-size: 3rem;
+            font-weight: bold;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+            box-shadow: var(--card-shadow);
+            border: 4px solid white;
+            text-align: center;
+        }
+
+        .streak-milestone.milestone-show {
+            animation: milestonePopup 2s ease-out forwards;
+        }
+
+        /* Add these new keyframe animations */
+        @keyframes achievementPopup {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            10% { transform: translate(-50%, -50%) scale(1.2); }
+            20% { transform: translate(-50%, -50%) scale(1); }
+            80% { transform: translate(-50%, -50%) scale(1); }
+            100% { transform: translate(-50%, -50%) scale(0); }
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg) scale(0); }
+            10% { transform: translateY(10px) rotate(45deg) scale(1); }
+            100% { transform: translateY(100vh) rotate(720deg) scale(0); }
+        }
+
+        @keyframes starPop {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes milestonePopup {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.5) rotate(-5deg);
+                opacity: 0;
+                visibility: visible;
+            }
+            20% { 
+                transform: translate(-50%, -50%) scale(1.2) rotate(3deg);
+                opacity: 1;
+            }
+            80% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(-50%, -50%) translateY(-100px);
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        /* Add to your CSS */
+.statistics-panel {
+    background: var(--card-bg);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    margin-top: 2rem;
+    box-shadow: var(--card-shadow);
+    width: 90%;
+    max-width: 800px;
+}
+
+.statistics-panel h3 {
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.nikud-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+}
+
+.nikud-stat-item {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    transition: var(--transition);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.nikud-stat-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-shadow);
+}
+
+.nikud-symbol {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.nikud-name {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.nikud-progress {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+.nikud-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    transition: width 0.5s ease;
+}
+
+.settings-content {
+    width: 400px;
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+}
+
+.preset-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.preset-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    border: none;
+    background: var(--primary-light);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.preset-btn:hover {
+    background: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.nikud-toggle {
+    display: grid;
+    grid-template-columns: auto 1fr 2fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    transition: var(--transition);
+}
+
+.nikud-example {
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+.sound-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.volume-control input[type="range"] {
+    flex: 1;
+}
+
+/* Replace the existing success-stars related CSS with: */
+.letter-success {
+    animation: successScale 0.5s ease-out;
+}
+
+@keyframes successScale {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.settings-content {
+    width: 400px;
+    background: white;
+    padding: 2rem;
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: #f8f9fa;
+}
+
+.settings-section h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    text-align: center;
+}
+
+.preset-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.preset-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: none;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.preset-btn .emoji {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.preset-btn .text {
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.preset-btn small {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.preset-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.nikud-toggles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.nikud-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nikud-toggle:hover {
+    background: #f0f0f0;
+}
+
+.sound-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.volume-control input[type="range"] {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: #e9ecef;
+}
+
+.volume-icon {
+    font-size: 1.25rem;
+}
+
+.sound-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 0.75rem;
+    cursor: pointer;
+}
+
+
+/* Update the settings panel styles */
+.settings-content {
+    width: 400px;
+    max-height: 80vh; /* Limit height to prevent overflow */
+    overflow-y: auto; /* Add scrolling if content is too long */
+    background: white;
+    padding: 2rem;
+    border-radius: 1.5rem;
+    position: fixed; /* Change to fixed positioning */
+    top: 5rem; /* Position below the toggle button */
+    right: 1rem;
+}
+
+.nikud-toggles {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); /* Change to single column */
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.nikud-toggle {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Update the preset-buttons styles */
+.preset-buttons {
+    display: grid;
+    grid-template-columns: 1fr;  /* Change to single column */
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.preset-btn {
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    flex-direction: row;  /* Change to row layout */
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.preset-btn .emoji {
+    font-size: 2rem;
+    margin: 0;
+}
+
+.preset-btn .text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.preset-btn .text {
+    font-weight: bold;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.preset-btn small {
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+}
+
+
+/* Add custom checkbox styles */
+.nikud-toggle {
+    background: white;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    display: grid;
+    grid-template-columns: 2rem auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.nikud-toggle:hover {
+    border-color: var(--primary-light);
+    background: #f8f9fa;
+}
+
+.nikud-toggle input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--primary-light);
+    border-radius: 0.5rem;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nikud-toggle input[type="checkbox"]:checked {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.nikud-toggle input[type="checkbox"]:checked::after {
+    content: '✓';
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+}
+
+.nikud-example {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    width: 2.5rem;
+    text-align: center;
+}
+
+.nikud-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
     </style>
 </head>
 <body>
     <div id="display-area">
         <div class="letter-display"></div>
     </div>
-    
-    <div class="controls">
-        <button class="correct-btn" onclick="window.gameHandlers.handleCorrect()">✓ Correct</button>
-        <button class="incorrect-btn" onclick="window.gameHandlers.handleIncorrect()">✗ Wrong</button>
-    </div>
 
-    <div class="sound-container">
-        <audio id="successSound" preload="auto">
-            <source src="./public/sounds/success.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="errorSound" preload="auto">
-            <source src="./public/sounds/error.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="streakSound" preload="auto">
-            <source src="./public/sounds/streak.mp3" type="audio/mpeg">
-        </audio>
-    </div>
+     <!-- Add audio elements -->
+     <audio id="successSound" preload="auto">
+        <source src="./public/sounds/success.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="errorSound" preload="auto">
+        <source src="./public/sounds/error.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="streakSound" preload="auto">
+        <source src="./public/sounds/streak.mp3" type="audio/mpeg">
+    </audio>
 
-    <div class="counter">Letters shown: <span id="counter">0</span></div>
-
-    <div class="statistics-panel">
-        <h3>Nikud Statistics</h3>
-        <div id="nikud-stats" class="nikud-stats-grid"></div>
-    </div>
-
+    <!-- Add milestone display -->
     <div id="streak-milestone" class="streak-milestone"></div>
 
+    <!-- Add counter display -->
+    <div class="counter">אותיות שנלמדו: <span id="counter">0</span></div>
+
+
+    
+    <div class="controls">
+        <button class="correct-btn" onclick="window.gameHandlers.handleCorrect()">✓ נכון</button>
+        <button class="incorrect-btn" onclick="window.gameHandlers.handleIncorrect()">✗ לא נכון</button>
+    </div>
+
+    <div class="streak-counter">
+        <span>🔥</span>
+        <span id="streak">0</span>
+    </div>
+
+    <div class="settings-panel">
+        <button class="settings-toggle" onclick="toggleSettings()">⚙️ הגדרות להורים</button>
+        <div class="settings-content">
+            <!-- Add Difficulty Level Section -->
+            <div class="settings-section">
+                <h3>רמת קושי</h3>
+                <div class="preset-buttons">
+                    <button class="preset-btn beginner" onclick="window.gameHandlers.setPreset('beginner')">
+                        <span class="emoji">🌱</span>
+                        <div class="text-container">
+                            <span class="text">מתחילים</span>
+                            <small>קמץ, פתח, חיריק</small>
+                        </div>
+                    </button>
+                    <button class="preset-btn intermediate" onclick="window.gameHandlers.setPreset('intermediate')">
+                        <span class="emoji">🌿</span>
+                        <div class="text-container">
+                            <span class="text">מתקדמים</span>
+                            <small>+ צירה, סגול</small>
+                        </div>
+                    </button>
+                    <button class="preset-btn advanced" onclick="window.gameHandlers.setPreset('advanced')">
+                        <span class="emoji">🌳</span>
+                        <div class="text-container">
+                            <span class="text">מתקדמים+</span>
+                            <small>+ שווא, חולם, שורוק</small>
+                        </div>
+                    </button>
+                </div>
+            </div>
+    
+            <!-- Custom Nikud Selection -->
+            <div class="settings-section">
+                <h3>בחירה מותאמת אישית</h3>
+                <!-- Replace the nikud-toggles div content with this complete list -->
+<div class="nikud-toggles">
+    <label class="nikud-toggle">
+        <input type="checkbox" checked data-nikud="Qamats">
+        <span class="nikud-example">בָּ</span>
+        <span class="nikud-name">קמץ</span>
+    </label>
+    <label class="nikud-toggle">
+        <input type="checkbox" checked data-nikud="Patah">
+        <span class="nikud-example">בַּ</span>
+        <span class="nikud-name">פתח</span>
+    </label>
+    <label class="nikud-toggle">
+        <input type="checkbox" checked data-nikud="Hiriq">
+        <span class="nikud-example">בִּ</span>
+        <span class="nikud-name">חיריק</span>
+    </label>
+    <label class="nikud-toggle">
+        <input type="checkbox" checked data-nikud="Tsere">
+        <span class="nikud-example">בֵּ</span>
+        <span class="nikud-name">צירה</span>
+    </label>
+    <label class="nikud-toggle">
+        <input type="checkbox" checked data-nikud="Segol">
+        <span class="nikud-example">בֶּ</span>
+        <span class="nikud-name">סגול</span>
+    </label>
+    <label class="nikud-toggle">
+        <input type="checkbox" checked data-nikud="Sheva">
+        <span class="nikud-example">בְּ</span>
+        <span class="nikud-name">שווא</span>
+    </label>
+    <label class="nikud-toggle">
+        <input type="checkbox" checked data-nikud="Holam">
+        <span class="nikud-example">בֹּ</span>
+        <span class="nikud-name">חולם</span>
+    </label>
+    <label class="nikud-toggle">
+        <input type="checkbox" checked data-nikud="FullShuruk">
+        <span class="nikud-example">וּ</span>
+        <span class="nikud-name">שורוק</span>
+    </label>
+    <label class="nikud-toggle">
+        <input type="checkbox" checked data-nikud="FullHolam">
+        <span class="nikud-example">וֹ</span>
+        <span class="nikud-name">חולם מלא</span>
+    </label>
+</div>
+            </div>
+    
+            <!-- Sound Settings -->
+            <div class="settings-section">
+                <h3>הגדרות צליל</h3>
+                <div class="sound-controls">
+                    <label class="sound-toggle">
+                        <input type="checkbox" checked id="enableSounds">
+                        <span class="toggle-label">צלילים</span>
+                        <span class="toggle-icon">🔊</span>
+                    </label>
+                    <div class="volume-control">
+                        <span class="volume-icon">🔈</span>
+                        <input type="range" min="0" max="100" value="50" id="volumeControl">
+                        <span class="volume-icon">🔊</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add after the controls div -->
+<div class="statistics-panel">
+    <h3>התקדמות בלימוד</h3>
+    <div id="nikud-stats" class="nikud-stats-grid"></div>
+</div>
 
     <script type="module" src="./dist/index.js"></script>
+    <script>
+        function toggleSettings() {
+            const content = document.querySelector('.settings-content');
+            content?.classList.toggle('show');
+        }
+        
+        document.querySelectorAll('.nikud-toggle input').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const target = e.target;
+                if (target instanceof HTMLInputElement) {
+                    const nikud = target.dataset.nikud;
+                    if (nikud && window.gameHandlers) {
+                        window.gameHandlers.updateNikudSettings(nikud, target.checked);
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>

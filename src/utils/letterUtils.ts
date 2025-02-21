@@ -21,7 +21,7 @@ interface CharectorNikud {
 }
 
 // Constants
-const HEBREW_SETTINGS: NikudSettings = {
+let HEBREW_SETTINGS: NikudSettings = {
     "Sheva": true,
     "Hiriq": true,
     "Tsere": true,
@@ -32,8 +32,6 @@ const HEBREW_SETTINGS: NikudSettings = {
     "FullShuruk": true,
     "FullHolam": true
 };
-
-
 
 const SHIN_SIN_DOTS: [number, number] = [0x05C1, 0x05C2];
 const DAGESH_CODE: number = 0x05BC;
@@ -77,8 +75,8 @@ const NIKUD_LIST  = [
     { nikud: getNikudNameToStr("FullHolam"), name: "Holam Malei" }
 ];
 
-// Cache for Hebrew combinations
-let hebrewCombinationsCache: string[] = [];
+
+
 
 
 function getNikudNameToStr(name: string): string {
@@ -127,9 +125,26 @@ function getNikudNameToStr(name: string): string {
 
 
 class HebrewLetterGenerator {
+    private static recentLetters: string[] = [];
+    private static recentNikud: string[] = [];
+    private static MAX_RECENT = 4;  // Keep track of last 4 to avoid repetition
+
+
     private static generateRandomLetter(): string {
         const letters = Object.keys(HEBREW_LETTERS);
-        const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+        let randomLetter: string;
+        
+        // Try to get a letter that wasn't used recently
+        do {
+            const randomIndex = Math.floor(Math.random() * letters.length);
+            randomLetter = letters[randomIndex];
+        } while (this.recentLetters.includes(randomLetter) && this.recentLetters.length < letters.length);
+
+        // Update recent letters
+        this.recentLetters.push(randomLetter);
+        if (this.recentLetters.length > this.MAX_RECENT) {
+            this.recentLetters.shift();
+        }
         
         return this.addDiacritics(randomLetter);
     }
@@ -169,35 +184,82 @@ class HebrewLetterGenerator {
 
     private static generateWeightedNikud(weights: WeightedNikud): string {
         const nikudOptions: string[] = [];
-
+        const usedNikud = new Set(this.recentNikud);
+    
+        // First try to use non-recent nikud
         Object.entries(weights).forEach(([key, weight]) => {
-            for (let i = 0; i < weight; i++) {
-                nikudOptions.push(getNikudNameToStr(key));
+            if (HEBREW_SETTINGS[key]) {
+                const nikud = getNikudNameToStr(key);
+                if (nikud && !usedNikud.has(nikud)) {
+                    for (let i = 0; i < weight; i++) {
+                        nikudOptions.push(nikud);
+                    }
+                }
             }
         });
 
-        // Add regular nikud options
-        Object.keys(HEBREW_SETTINGS).forEach(nikudName => {
-            if (HEBREW_SETTINGS[nikudName]) {
-                nikudOptions.push(getNikudNameToStr(nikudName));
-            }
-        });
+        // If no non-recent options available, use all weighted options
+        if (nikudOptions.length === 0) {
+            Object.entries(weights).forEach(([key, weight]) => {
+                if (HEBREW_SETTINGS[key]) {
+                    const nikud = getNikudNameToStr(key);
+                    if (nikud) {
+                        for (let i = 0; i < weight; i++) {
+                            nikudOptions.push(nikud);
+                        }
+                    }
+                }
+            });
+        }
 
-        return nikudOptions[Math.floor(Math.random() * nikudOptions.length)];
+        const selectedNikud = nikudOptions[Math.floor(Math.random() * nikudOptions.length)];
+        
+        // Update recent nikud
+        this.recentNikud.push(selectedNikud);
+        if (this.recentNikud.length > this.MAX_RECENT) {
+            this.recentNikud.shift();
+        }
+
+        return selectedNikud;
     }
 
     private static generateUnweightedNikud(): string {
-        const nikudOptions: string[] = [];
-
-        // Add regular nikud options
-        Object.keys(HEBREW_SETTINGS).forEach(nikudName => {
-            if (HEBREW_SETTINGS[nikudName]) {
-                nikudOptions.push(getNikudNameToStr(nikudName));
+        const availableNikud: string[] = [];
+        
+        // Get all enabled nikud options
+        Object.entries(HEBREW_SETTINGS).forEach(([nikudName, isEnabled]) => {
+            if (isEnabled) {
+                const nikud = getNikudNameToStr(nikudName);
+                if (nikud && !this.recentNikud.includes(nikud)) {
+                    availableNikud.push(nikud);
+                }
             }
         });
 
-        return nikudOptions[Math.floor(Math.random() * nikudOptions.length)];
+        // If all recent nikud were used or none available, reset and use all enabled
+        if (availableNikud.length === 0) {
+            Object.entries(HEBREW_SETTINGS).forEach(([nikudName, isEnabled]) => {
+                if (isEnabled) {
+                    const nikud = getNikudNameToStr(nikudName);
+                    if (nikud) availableNikud.push(nikud);
+                }
+            });
+            this.recentNikud = [];
+        }
+
+        // Select random nikud from available options
+        const randomIndex = Math.floor(Math.random() * availableNikud.length);
+        const selectedNikud = availableNikud[randomIndex];
+
+        // Update recent nikud
+        this.recentNikud.push(selectedNikud);
+        if (this.recentNikud.length > this.MAX_RECENT) {
+            this.recentNikud.shift();
+        }
+
+        return selectedNikud;
     }
+
 
     static generateNextCharacter(weights: WeightedNikud = {}): CharectorNikud {
         const letter = this.generateRandomLetter();
@@ -206,6 +268,16 @@ class HebrewLetterGenerator {
             charector:  letter + nikud,
             nikud: nikud
         };
+    }
+}
+
+
+// Add a function to update settings
+export function updateNikudSettings(nikud: string, enabled: boolean): void {
+    if (nikud in HEBREW_SETTINGS) {
+        HEBREW_SETTINGS[nikud] = enabled;
+        console.log(`Updated ${nikud} to ${enabled}`);
+        console.log('Current settings:', HEBREW_SETTINGS);
     }
 }
 

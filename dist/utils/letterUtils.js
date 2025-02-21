@@ -1,5 +1,5 @@
 // Constants
-const HEBREW_SETTINGS = {
+let HEBREW_SETTINGS = {
     "Sheva": true,
     "Hiriq": true,
     "Tsere": true,
@@ -47,8 +47,6 @@ const NIKUD_LIST = [
     { nikud: getNikudNameToStr("FullShuruk"), name: "Shuruk" },
     { nikud: getNikudNameToStr("FullHolam"), name: "Holam Malei" }
 ];
-// Cache for Hebrew combinations
-let hebrewCombinationsCache = [];
 function getNikudNameToStr(name) {
     if (name === "Sheva") {
         return String.fromCodePoint(NIKUD_CODES["Sheva"]);
@@ -84,7 +82,17 @@ function getNikudNameToStr(name) {
 class HebrewLetterGenerator {
     static generateRandomLetter() {
         const letters = Object.keys(HEBREW_LETTERS);
-        const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+        let randomLetter;
+        // Try to get a letter that wasn't used recently
+        do {
+            const randomIndex = Math.floor(Math.random() * letters.length);
+            randomLetter = letters[randomIndex];
+        } while (this.recentLetters.includes(randomLetter) && this.recentLetters.length < letters.length);
+        // Update recent letters
+        this.recentLetters.push(randomLetter);
+        if (this.recentLetters.length > this.MAX_RECENT) {
+            this.recentLetters.shift();
+        }
         return this.addDiacritics(randomLetter);
     }
     static addDiacritics(letter) {
@@ -114,28 +122,70 @@ class HebrewLetterGenerator {
     }
     static generateWeightedNikud(weights) {
         const nikudOptions = [];
+        const usedNikud = new Set(this.recentNikud);
+        // First try to use non-recent nikud
         Object.entries(weights).forEach(([key, weight]) => {
-            for (let i = 0; i < weight; i++) {
-                nikudOptions.push(getNikudNameToStr(key));
+            if (HEBREW_SETTINGS[key]) {
+                const nikud = getNikudNameToStr(key);
+                if (nikud && !usedNikud.has(nikud)) {
+                    for (let i = 0; i < weight; i++) {
+                        nikudOptions.push(nikud);
+                    }
+                }
             }
         });
-        // Add regular nikud options
-        Object.keys(HEBREW_SETTINGS).forEach(nikudName => {
-            if (HEBREW_SETTINGS[nikudName]) {
-                nikudOptions.push(getNikudNameToStr(nikudName));
-            }
-        });
-        return nikudOptions[Math.floor(Math.random() * nikudOptions.length)];
+        // If no non-recent options available, use all weighted options
+        if (nikudOptions.length === 0) {
+            Object.entries(weights).forEach(([key, weight]) => {
+                if (HEBREW_SETTINGS[key]) {
+                    const nikud = getNikudNameToStr(key);
+                    if (nikud) {
+                        for (let i = 0; i < weight; i++) {
+                            nikudOptions.push(nikud);
+                        }
+                    }
+                }
+            });
+        }
+        const selectedNikud = nikudOptions[Math.floor(Math.random() * nikudOptions.length)];
+        // Update recent nikud
+        this.recentNikud.push(selectedNikud);
+        if (this.recentNikud.length > this.MAX_RECENT) {
+            this.recentNikud.shift();
+        }
+        return selectedNikud;
     }
     static generateUnweightedNikud() {
-        const nikudOptions = [];
-        // Add regular nikud options
-        Object.keys(HEBREW_SETTINGS).forEach(nikudName => {
-            if (HEBREW_SETTINGS[nikudName]) {
-                nikudOptions.push(getNikudNameToStr(nikudName));
+        const availableNikud = [];
+        // Get all enabled nikud options
+        Object.entries(HEBREW_SETTINGS).forEach(([nikudName, isEnabled]) => {
+            if (isEnabled) {
+                const nikud = getNikudNameToStr(nikudName);
+                if (nikud && !this.recentNikud.includes(nikud)) {
+                    availableNikud.push(nikud);
+                }
             }
         });
-        return nikudOptions[Math.floor(Math.random() * nikudOptions.length)];
+        // If all recent nikud were used or none available, reset and use all enabled
+        if (availableNikud.length === 0) {
+            Object.entries(HEBREW_SETTINGS).forEach(([nikudName, isEnabled]) => {
+                if (isEnabled) {
+                    const nikud = getNikudNameToStr(nikudName);
+                    if (nikud)
+                        availableNikud.push(nikud);
+                }
+            });
+            this.recentNikud = [];
+        }
+        // Select random nikud from available options
+        const randomIndex = Math.floor(Math.random() * availableNikud.length);
+        const selectedNikud = availableNikud[randomIndex];
+        // Update recent nikud
+        this.recentNikud.push(selectedNikud);
+        if (this.recentNikud.length > this.MAX_RECENT) {
+            this.recentNikud.shift();
+        }
+        return selectedNikud;
     }
     static generateNextCharacter(weights = {}) {
         const letter = this.generateRandomLetter();
@@ -144,6 +194,17 @@ class HebrewLetterGenerator {
             charector: letter + nikud,
             nikud: nikud
         };
+    }
+}
+HebrewLetterGenerator.recentLetters = [];
+HebrewLetterGenerator.recentNikud = [];
+HebrewLetterGenerator.MAX_RECENT = 4; // Keep track of last 4 to avoid repetition
+// Add a function to update settings
+export function updateNikudSettings(nikud, enabled) {
+    if (nikud in HEBREW_SETTINGS) {
+        HEBREW_SETTINGS[nikud] = enabled;
+        console.log(`Updated ${nikud} to ${enabled}`);
+        console.log('Current settings:', HEBREW_SETTINGS);
     }
 }
 export { HebrewLetterGenerator, getNikudNameToStr, NIKUD_LIST };
