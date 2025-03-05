@@ -30,7 +30,8 @@ let HEBREW_SETTINGS: NikudSettings = {
     "Qamats": true,
     "Holam": true,
     "FullShuruk": true,
-    "FullHolam": true
+    "FullHolam": true,
+    "Kubutz": true
 };
 
 const SHIN_SIN_DOTS: [number, number] = [0x05C1, 0x05C2];
@@ -44,7 +45,8 @@ const NIKUD_CODES: NikudCodeMap = {
     "Segol": 0x05B6,
     "Patah": 0x05B7,
     "Qamats": 0x05B8,
-    "Holam": 0x05B9
+    "Holam": 0x05B9,
+    "Kubutz": 0x05BB,
 };
 
 const HEBREW_LETTERS: HebrewCharacterMap = {
@@ -64,6 +66,7 @@ const DAGESH_LETTERS: number[] = [
 ];
 
 const NIKUD_LIST  = [
+    { nikud: getNikudNameToStr("Kubutz"), name: "Kubutz" },
     { nikud: getNikudNameToStr("Sheva"), name: "Sheva" },
     { nikud: getNikudNameToStr("Hiriq"), name: "Hiriq" },
     { nikud: getNikudNameToStr("Tsere"), name: "Tsere" },
@@ -84,6 +87,10 @@ function getNikudNameToStr(name: string): string {
     {
         return String.fromCodePoint(NIKUD_CODES["Sheva"]);
     }
+    else if (name === "Kubutz")
+        {
+            return String.fromCodePoint(NIKUD_CODES["Kubutz"]);
+        }
     else if (name === "Hiriq")
     {
         return String.fromCodePoint(NIKUD_CODES["Hiriq"]);

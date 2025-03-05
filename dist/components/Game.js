@@ -399,10 +399,10 @@ export class Game {
                         this.setNikudPreset(['Qamats', 'Patah', 'Hiriq']);
                         break;
                     case 'intermediate':
-                        this.setNikudPreset(['Qamats', 'Patah', 'Hiriq', 'Tsere', 'Segol']);
+                        this.setNikudPreset(['Qamats', 'Patah', 'Hiriq', 'Tsere', 'Segol', 'Kubutz']);
                         break;
                     case 'advanced':
-                        this.setNikudPreset(['Sheva', 'Holam', 'FullShuruk', 'FullHolam']);
+                        this.setNikudPreset(['Qamats', 'Patah', 'Hiriq', 'Tsere', 'Segol', 'Kubutz', 'Sheva', 'Holam', 'FullShuruk', 'FullHolam']);
                         break;
                 }
             },
