@@ -303,7 +303,7 @@ export class Game {
             const accuracy = (stats.correct / stats.total * 100).toFixed(0);
             const milestone = document.getElementById('streak-milestone');
             if (milestone) {
-                milestone.textContent = `Keep practicing ${nikud} - ${accuracy}% mastery`;
+                milestone.textContent = `תמשיך להתמיד ותהיה אלוף!`; //`Keep practicing ${nikud} - ${accuracy}% mastery`;
                 milestone.classList.remove('milestone-show');
                 void milestone.offsetWidth;
                 milestone.classList.add('milestone-show');
