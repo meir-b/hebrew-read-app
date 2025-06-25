@@ -13,7 +13,6 @@ export const livelyEmojis: string[] = [
   "🍕", // pizza
   "🎈", // balloon
   "🎵", // musical note
-  "😂", // face with tears of joy
   "🌈", // rainbow
   "🔥", // fire
   "⚡", // high voltage
