@@ -85,8 +85,8 @@ export class LevelManager {
         this.levels = [
             {
                 id: 'level-1',
-                name: 'קריאה עם אותיות א-ב ודגש',
-                description: 'הבחנה בין ניקוד (ניקוד) באמצעות אותיות א-ב',
+                name: 'אותיות וניקוד',
+                description: 'הבחנה בין ההגיה השונה של האותיות עם הניקוד - אות בודדת',
                 icon: '🅰️',
                 letters: ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת'],
                 nikudTypes: ['Qamats', 'Patah', 'Tsere', 'Segol', 'FullHolam', 'Holam', 'Hiriq', 'Kubutz', 'FullShuruk'],

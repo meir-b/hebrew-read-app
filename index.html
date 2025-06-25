@@ -1128,6 +1128,44 @@
             cursor: pointer;
         }
 
+        /* Cache Controls */
+        .cache-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .cache-btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .danger-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            color: white;
+            box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+        }
+
+        .danger-btn:hover {
+            background: linear-gradient(135deg, #ff5252, #f44336);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 107, 107, 0.4);
+        }
+
+        .danger-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(255, 107, 107, 0.3);
+        }
+
         /* Update the settings panel styles */
         .settings-content {
             width: 400px;
@@ -1835,9 +1873,22 @@
                     </label>
                     <div class="volume-control">
                         <span class="volume-icon">🔈</span>
-                        <input type="range" min="0" max="100" value="50" id="volumeControl">
+                        <input type="range" min="0" max="100" value="100" id="volumeControl">
                         <span class="volume-icon">🔊</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- Cache Management -->
+            <div class="settings-section">
+                <h3>ניהול זיכרון</h3>
+                <div class="cache-controls">
+                    <button type="button" id="clearCurrentLevelBtn" class="cache-btn danger-btn">
+                        🗑️ נקה רמה נוכחית
+                    </button>
+                    <button type="button" id="clearAllLevelsBtn" class="cache-btn danger-btn">
+                        🗑️ נקה את כל הרמות
+                    </button>
                 </div>
             </div>
         </div>

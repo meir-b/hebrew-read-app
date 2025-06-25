@@ -11,6 +11,7 @@ import HebrewLetterDisplay from './HebrewLetterDisplay.js';
 import { AssessmentController } from '../controllers/AssessmentController.js';
 import { Statistics } from '../models/Statistics.js';
 import { LevelManager } from '../models/LevelManager.js';
+import { updateNikudSettings } from '../utils/letterUtils.js';
 export class Game {
     constructor() {
         this.streak = 0;
@@ -29,7 +30,7 @@ export class Game {
             NIKUD_MASTER: { id: 'nikud-master', title: '🏆 Nikud Master', description: 'Mastered all Nikud types!' }
         };
         this.soundsEnabled = true;
-        this.soundVolume = 0.5;
+        this.soundVolume = 1.0; // Max volume by default
         this.soundFiles = {
             success: [
                 new Audio('./public/sounds/success.mp3'),
@@ -97,6 +98,24 @@ export class Game {
             soundToggle.checked = this.soundsEnabled;
             soundToggle.addEventListener('change', (e) => {
                 this.soundsEnabled = e.target.checked;
+            });
+        }
+        // Initialize cache control buttons
+        this.initializeCacheControls();
+    }
+    initializeCacheControls() {
+        // Clear current level button
+        const clearCurrentLevelBtn = document.getElementById('clearCurrentLevelBtn');
+        if (clearCurrentLevelBtn) {
+            clearCurrentLevelBtn.addEventListener('click', () => {
+                this.clearCurrentLevel();
+            });
+        }
+        // Clear all levels button  
+        const clearAllLevelsBtn = document.getElementById('clearAllLevelsBtn');
+        if (clearAllLevelsBtn) {
+            clearAllLevelsBtn.addEventListener('click', () => {
+                this.clearAllLevels();
             });
         }
     }
@@ -497,7 +516,7 @@ export class Game {
             setPreset: (preset) => this.setNikudPreset(preset),
             clearCurrentLevel: () => this.clearCurrentLevel(),
             clearAllLevels: () => this.clearAllLevels(),
-            resetAllProgress: () => this.resetAllProgress()
+            updateNikudSettings: (nikud, enabled) => updateNikudSettings(nikud, enabled)
         };
     }
     setNikudPreset(preset) {
@@ -530,21 +549,30 @@ export class Game {
         this.letterDisplay.updateDisplayedLetter();
     }
     clearCurrentLevel() {
-        this.levelManager.clearCurrentLevelProgress();
-        this.updateLevelDisplay();
-        this.showNextLetter();
-        this.showSuccessMessage('🗑️ התקדמות הרמה הנוכחית נמחקה');
+        const currentLevel = this.levelManager.getCurrentLevel();
+        if (currentLevel) {
+            const confirmed = confirm(`האם אתה בטוח שברצונך לנקות את כל ההתקדמות של הרמה "${currentLevel.name}"?`);
+            if (confirmed) {
+                this.levelManager.clearCurrentLevelProgress();
+                this.updateLevelDisplay();
+                this.updateStatisticsDisplay();
+                this.showSuccessMessage('הרמה נוכחית נוקתה בהצלחה!');
+            }
+        }
     }
     clearAllLevels() {
-        this.levelManager.clearAllLevelsProgress();
-        this.updateLevelDisplay();
-        this.showNextLetter();
-        this.showSuccessMessage('🗑️ התקדמות כל הרמות נמחקה');
-    }
-    resetAllProgress() {
-        this.levelManager.resetProgress();
-        this.updateLevelDisplay();
-        this.updateLevelUI();
-        this.showSuccessMessage('🔄 כל ההתקדמות אופסה והמשחק התחיל מההתחלה');
+        const confirmed = confirm('האם אתה בטוח שברצונך לנקות את כל ההתקדמות של כל הרמות? פעולה זו לא ניתנת לביטול!');
+        if (confirmed) {
+            const doubleConfirmed = confirm('זוהי פעולה בלתי הפיכה! האם אתה בטוח לחלוטין?');
+            if (doubleConfirmed) {
+                this.levelManager.clearAllLevelsProgress();
+                this.statistics = new Statistics(); // Reset statistics as well
+                this.updateLevelDisplay();
+                this.updateStatisticsDisplay();
+                this.showSuccessMessage('כל הרמות נוקו בהצלחה!');
+                // Reload the game to reset to first level
+                this.updateLevelUI();
+            }
+        }
     }
 }

@@ -35,7 +35,7 @@ export class Game {
     };
 
     private soundsEnabled: boolean = true;
-    private soundVolume: number = 0.5;
+    private soundVolume: number = 1.0; // Max volume by default
     private readonly soundFiles = {
         success: [
             new Audio('./public/sounds/success.mp3'),
@@ -110,6 +110,27 @@ export class Game {
             soundToggle.checked = this.soundsEnabled;
             soundToggle.addEventListener('change', (e) => {
                 this.soundsEnabled = (e.target as HTMLInputElement).checked;
+            });
+        }
+
+        // Initialize cache control buttons
+        this.initializeCacheControls();
+    }
+
+    private initializeCacheControls(): void {
+        // Clear current level button
+        const clearCurrentLevelBtn = document.getElementById('clearCurrentLevelBtn');
+        if (clearCurrentLevelBtn) {
+            clearCurrentLevelBtn.addEventListener('click', () => {
+                this.clearCurrentLevel();
+            });
+        }
+
+        // Clear all levels button  
+        const clearAllLevelsBtn = document.getElementById('clearAllLevelsBtn');
+        if (clearAllLevelsBtn) {
+            clearAllLevelsBtn.addEventListener('click', () => {
+                this.clearAllLevels();
             });
         }
     }
@@ -572,7 +593,7 @@ private addStreakAnimation(): void {
             setPreset: (preset: string) => this.setNikudPreset(preset),
             clearCurrentLevel: () => this.clearCurrentLevel(),
             clearAllLevels: () => this.clearAllLevels(),
-            resetAllProgress: () => this.resetAllProgress()
+            updateNikudSettings: (nikud: string, enabled: boolean) => updateNikudSettings(nikud, enabled)
         };
     }
 
@@ -610,24 +631,32 @@ private addStreakAnimation(): void {
         this.letterDisplay.updateDisplayedLetter();
     }
 
-    public clearCurrentLevel(): void {
-        this.levelManager.clearCurrentLevelProgress();
-        this.updateLevelDisplay();
-        this.showNextLetter();
-        this.showSuccessMessage('🗑️ התקדמות הרמה הנוכחית נמחקה');
+    private clearCurrentLevel(): void {
+        const currentLevel = this.levelManager.getCurrentLevel();
+        if (currentLevel) {
+            const confirmed = confirm(`האם אתה בטוח שברצונך לנקות את כל ההתקדמות של הרמה "${currentLevel.name}"?`);
+            if (confirmed) {
+                this.levelManager.clearCurrentLevelProgress();
+                this.updateLevelDisplay();
+                this.updateStatisticsDisplay();
+                this.showSuccessMessage('הרמה נוכחית נוקתה בהצלחה!');
+            }
+        }
     }
 
-    public clearAllLevels(): void {
-        this.levelManager.clearAllLevelsProgress();
-        this.updateLevelDisplay();
-        this.showNextLetter();
-        this.showSuccessMessage('🗑️ התקדמות כל הרמות נמחקה');
-    }
-
-    public resetAllProgress(): void {
-        this.levelManager.resetProgress();
-        this.updateLevelDisplay();
-        this.updateLevelUI();
-        this.showSuccessMessage('🔄 כל ההתקדמות אופסה והמשחק התחיל מההתחלה');
+    private clearAllLevels(): void {
+        const confirmed = confirm('האם אתה בטוח שברצונך לנקות את כל ההתקדמות של כל הרמות? פעולה זו לא ניתנת לביטול!');
+        if (confirmed) {
+            const doubleConfirmed = confirm('זוהי פעולה בלתי הפיכה! האם אתה בטוח לחלוטין?');
+            if (doubleConfirmed) {
+                this.levelManager.clearAllLevelsProgress();
+                this.statistics = new Statistics(); // Reset statistics as well
+                this.updateLevelDisplay();
+                this.updateStatisticsDisplay();
+                this.showSuccessMessage('כל הרמות נוקו בהצלחה!');
+                // Reload the game to reset to first level
+                this.updateLevelUI();
+            }
+        }
     }
 }
