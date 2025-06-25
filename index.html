@@ -378,6 +378,7 @@
             align-items: center;
             justify-content: center;
             padding: 1rem;
+            z-index: 2000; /* Ensure higher z-index */
         }
 
         .settings-content > div {
@@ -390,6 +391,48 @@
             max-width: 400px;
             max-height: 80vh;
             overflow-y: auto;
+            position: relative;
+            z-index: 2001;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Settings Header */
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .settings-header h2 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+        }
+
+        .close-settings {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+        }
+
+        .close-settings:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--text-primary);
         }
 
         .settings-content.show {
@@ -425,6 +468,22 @@
                 width: auto;
                 min-width: 350px;
                 max-height: none;
+            }
+
+            .preset-buttons {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+            }
+
+            .nikud-toggles {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+
+            .settings-header {
+                display: none; /* Hide close button on desktop */
             }
         }
 
@@ -1021,18 +1080,49 @@
             padding: 2rem;
         }
 
+        /* Mobile Settings Layout - Override any conflicting styles */
+        .settings-content > div {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
         .settings-section {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             padding: 1rem;
             border-radius: 1rem;
             background: #f8f9fa;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .settings-section h3 {
             color: var(--text-primary);
-            margin-bottom: 1rem;
-            font-size: 1.25rem;
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
             text-align: center;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .preset-btn {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 1rem;
+            border: none;
+            background: var(--primary-light);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            box-sizing: border-box;
+            touch-action: manipulation;
         }
 
         .preset-buttons {
@@ -1129,17 +1219,17 @@
         }
 
         /* Cache Controls */
-        .cache-controls {
+        .settings-content .cache-controls {
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
         }
 
-        .cache-btn {
-            padding: 0.75rem 1rem;
+        .settings-content .cache-btn {
+            padding: 1rem 1.5rem;
             border: none;
             border-radius: 0.75rem;
-            font-size: 0.9rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -1147,48 +1237,64 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            touch-action: manipulation;
+            min-height: 48px; /* Ensure minimum touch target size */
+            width: 100%;
+            -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+            user-select: none; /* Prevent text selection */
         }
 
-        .danger-btn {
+        .settings-content .cache-btn.danger-btn {
             background: linear-gradient(135deg, #ff6b6b, #ff5252);
             color: white;
             box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
         }
 
-        .danger-btn:hover {
+        .settings-content .cache-btn.danger-btn:hover,
+        .settings-content .cache-btn.danger-btn:focus {
             background: linear-gradient(135deg, #ff5252, #f44336);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(255, 107, 107, 0.4);
         }
 
-        .danger-btn:active {
+        .settings-content .cache-btn.danger-btn:active {
             transform: translateY(0);
             box-shadow: 0 1px 2px rgba(255, 107, 107, 0.3);
         }
 
+        @media (min-width: 768px) {
+            .settings-content .cache-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+                min-height: auto;
+            }
+        }
+
         /* Update the settings panel styles */
-        .settings-content {
-            width: 400px;
-            max-height: 80vh; /* Limit height to prevent overflow */
-            overflow-y: auto; /* Add scrolling if content is too long */
-            background: white;
-            padding: 2rem;
-            border-radius: 1.5rem;
-            position: fixed; /* Change to fixed positioning */
-            top: 5rem; /* Position below the toggle button */
-            right: 1rem;
+        @media (min-width: 768px) {
+            .settings-content {
+                width: 400px;
+                max-height: 80vh; /* Limit height to prevent overflow */
+                overflow-y: auto; /* Add scrolling if content is too long */
+                background: white;
+                padding: 2rem;
+                border-radius: 1.5rem;
+                position: fixed; /* Change to fixed positioning */
+                top: 5rem; /* Position below the toggle button */
+                right: 1rem;
+            }
         }
 
         .nikud-toggles {
-            display: grid;
-            grid-template-columns: repeat(1, 1fr); /* Change to single column */
+            display: flex;
+            flex-direction: column;
             gap: 0.75rem;
             margin-top: 1rem;
+            width: 100%;
         }
 
         .nikud-toggle {
-            display: grid;
-            grid-template-columns: auto auto 1fr;
+            display: flex;
             align-items: center;
             gap: 1rem;
             padding: 0.75rem;
@@ -1196,6 +1302,8 @@
             border-radius: 0.75rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* Update the preset-buttons styles */
@@ -1776,9 +1884,16 @@
     <div class="settings-panel">
         <button class="settings-toggle" onclick="toggleSettings()">⚙️ הגדרות להורים</button>
         <div class="settings-content">
-            <!-- Add Difficulty Level Section -->
-            <div class="settings-section">
-                <h3>רמת קושי</h3>
+            <div>
+                <!-- Close button for mobile -->
+                <div class="settings-header">
+                    <h2>הגדרות</h2>
+                    <button class="close-settings" onclick="toggleSettings()">✕</button>
+                </div>
+                
+                <!-- Add Difficulty Level Section -->
+                <div class="settings-section">
+                    <h3>רמת קושי</h3>
                 <div class="preset-buttons">
                     <button class="preset-btn beginner" onclick="window.gameHandlers.setPreset('beginner')">
                         <span class="emoji">🌱</span>
@@ -1891,6 +2006,7 @@
                     </button>
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
@@ -1900,6 +2016,23 @@
             const content = document.querySelector('.settings-content');
             content?.classList.toggle('show');
         }
+
+        // Close settings when clicking outside
+        document.addEventListener('click', (e) => {
+            const settingsContent = document.querySelector('.settings-content');
+            const settingsToggle = document.querySelector('.settings-toggle');
+            const closeButton = document.querySelector('.close-settings');
+            
+            if (settingsContent && settingsContent.classList.contains('show')) {
+                // If clicking outside settings content or on close button
+                if (!settingsContent.contains(e.target) || e.target === closeButton) {
+                    // Don't close if clicking the toggle button (let toggleSettings handle it)
+                    if (e.target !== settingsToggle) {
+                        settingsContent.classList.remove('show');
+                    }
+                }
+            }
+        });
         
         document.querySelectorAll('.nikud-toggle input').forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {

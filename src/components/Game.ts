@@ -118,20 +118,38 @@ export class Game {
     }
 
     private initializeCacheControls(): void {
+        console.log('Initializing cache controls...');
+        
         // Clear current level button
         const clearCurrentLevelBtn = document.getElementById('clearCurrentLevelBtn');
+        console.log('Clear current level button:', clearCurrentLevelBtn);
         if (clearCurrentLevelBtn) {
-            clearCurrentLevelBtn.addEventListener('click', () => {
+            // Add both click and touchend events for better mobile support
+            clearCurrentLevelBtn.addEventListener('click', (e) => {
+                e.preventDefault();
                 this.clearCurrentLevel();
             });
+            clearCurrentLevelBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.clearCurrentLevel();
+            });
+            console.log('Added event listeners to clear current level button');
         }
 
         // Clear all levels button  
         const clearAllLevelsBtn = document.getElementById('clearAllLevelsBtn');
+        console.log('Clear all levels button:', clearAllLevelsBtn);
         if (clearAllLevelsBtn) {
-            clearAllLevelsBtn.addEventListener('click', () => {
+            // Add both click and touchend events for better mobile support
+            clearAllLevelsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
                 this.clearAllLevels();
             });
+            clearAllLevelsBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.clearAllLevels();
+            });
+            console.log('Added event listeners to clear all levels button');
         }
     }
 
@@ -632,6 +650,7 @@ private addStreakAnimation(): void {
     }
 
     private clearCurrentLevel(): void {
+        console.log('Clear current level clicked');
         const currentLevel = this.levelManager.getCurrentLevel();
         if (currentLevel) {
             const confirmed = confirm(`האם אתה בטוח שברצונך לנקות את כל ההתקדמות של הרמה "${currentLevel.name}"?`);
@@ -640,11 +659,13 @@ private addStreakAnimation(): void {
                 this.updateLevelDisplay();
                 this.updateStatisticsDisplay();
                 this.showSuccessMessage('הרמה נוכחית נוקתה בהצלחה!');
+                console.log('Current level cleared successfully');
             }
         }
     }
 
     private clearAllLevels(): void {
+        console.log('Clear all levels clicked');
         const confirmed = confirm('האם אתה בטוח שברצונך לנקות את כל ההתקדמות של כל הרמות? פעולה זו לא ניתנת לביטול!');
         if (confirmed) {
             const doubleConfirmed = confirm('זוהי פעולה בלתי הפיכה! האם אתה בטוח לחלוטין?');
@@ -656,6 +677,7 @@ private addStreakAnimation(): void {
                 this.showSuccessMessage('כל הרמות נוקו בהצלחה!');
                 // Reload the game to reset to first level
                 this.updateLevelUI();
+                console.log('All levels cleared successfully');
             }
         }
     }
