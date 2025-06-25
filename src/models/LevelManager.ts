@@ -8,8 +8,6 @@ export const livelyEmojis: string[] = [
   "🤩", // star-struck
   "🥳", // partying face
   "🙌", // raising hands
-  "💃", // dancing woman
-  "🕺", // dancing man
   "✨", // sparkles
   "🚀", // rocket
   "🍕", // pizza
@@ -19,7 +17,6 @@ export const livelyEmojis: string[] = [
   "🌈", // rainbow
   "🔥", // fire
   "⚡", // high voltage
-  "🐱", // cat face
   "🎮", // video game
   "🏖️", // beach with umbrella
   "🍦"  // soft ice cream

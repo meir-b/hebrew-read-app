@@ -4,8 +4,6 @@ export const livelyEmojis = [
     "🤩",
     "🥳",
     "🙌",
-    "💃",
-    "🕺",
     "✨",
     "🚀",
     "🍕",
@@ -15,7 +13,6 @@ export const livelyEmojis = [
     "🌈",
     "🔥",
     "⚡",
-    "🐱",
     "🎮",
     "🏖️",
     "🍦" // soft ice cream

@@ -2025,7 +2025,7 @@
             
             if (settingsContent && settingsContent.classList.contains('show')) {
                 // If clicking outside settings content or on close button
-                if (!settingsContent.contains(e.target) || e.target === closeButton) {
+                if (!settingsContent.querySelector('div').contains(e.target) || e.target === closeButton) {
                     // Don't close if clicking the toggle button (let toggleSettings handle it)
                     if (e.target !== settingsToggle) {
                         settingsContent.classList.remove('show');
