@@ -1,13 +1,15 @@
 import HebrewLetterDisplay from './HebrewLetterDisplay.js';
 import { AssessmentController } from '../controllers/AssessmentController.js';
 import { Statistics } from '../models/Statistics.js';
-import { updateNikudSettings } from '../utils/letterUtils.js';
+import { LevelManager } from '../models/LevelManager.js';
+import { updateNikudSettings, LevelAwareGenerator } from '../utils/letterUtils.js';
 
 
 export class Game {
     private letterDisplay: HebrewLetterDisplay;
     private assessmentController: AssessmentController;
     private statistics: Statistics;
+    private levelManager: LevelManager;
     private lettersShown: number;
     private successSound!: HTMLAudioElement;
     private errorSound!: HTMLAudioElement;
@@ -73,16 +75,15 @@ export class Game {
     constructor() {
         console.log('Game initialized');
         this.statistics = new Statistics();
-        this.letterDisplay = new HebrewLetterDisplay(this.statistics);
+        this.levelManager = new LevelManager();
+        this.letterDisplay = new HebrewLetterDisplay(this.statistics, this.levelManager);
         this.assessmentController = new AssessmentController();
 
         this.lettersShown = 0;
         this.initializeSounds();
-        this.initializeHandlers();
+        this.initializeLevelUI();
 
         this.streak = 0;
-        this.initializeSounds();
-        this.initializeHandlers();
     }
 
     private initializeSounds(): void {
@@ -316,6 +317,9 @@ private async playSound(isCorrect: boolean): Promise<void> {
     private handleAssessment(isCorrect: boolean): void {
         const currentLetter = this.letterDisplay.getCurrentLetter();
         
+        // Record progress in level manager
+        const result = this.levelManager.recordAnswer(isCorrect);
+        
         if (isCorrect) {
             this.streak++;
             document.querySelector('.letter-display')?.classList.add('letter-success');
@@ -324,6 +328,15 @@ private async playSound(isCorrect: boolean): Promise<void> {
             }, 500);
             
             this.showSuccessMessage('יפה מאוד!');
+            
+            // Handle level completion and automatic advancement
+            if (result.levelCompleted) {
+                this.showLevelCompletionMessage(result.autoAdvanced);
+                if (result.autoAdvanced) {
+                    // Update the level UI to reflect the new level
+                    this.updateLevelUI();
+                }
+            }
             if (this.STREAK_LEVELS.includes(this.streak)) {
                 this.showMilestoneMessage(this.streak);
             }
@@ -336,6 +349,7 @@ private async playSound(isCorrect: boolean): Promise<void> {
         this.lettersShown++;
         this.updateCounter();
         this.updateStatisticsDisplay();
+        this.updateLevelDisplay();
         this.updateStreakDisplay();
         this.checkAchievements();
         this.playSound(isCorrect);
@@ -409,89 +423,211 @@ private addStreakAnimation(): void {
 
         streakElement.className = streakLevel > 0 ? 'streak-highlight' : '';
         if (streakLevel > 0) {
-            streakElement.style.color = this.getStreakColor(streakLevel);
-            streakElement.style.fontSize = `${24 + (streakLevel * 2)}px`;
-        } else {
-            streakElement.style.color = '';
-            streakElement.style.fontSize = '';
+            // Play corresponding streak sound
+            const sound = this.soundFiles.streak[streakLevel - 1];
+            if (sound) {
+                sound.currentTime = 0;
+                sound.volume = this.soundVolume;
+                sound.play().catch(console.error);
+            }
         }
     }
 }
 
-private getStreakColor(level: number): string {
-    const colors = {
-        3: '#ff4081',
-        6: '#FFA500',
-        9: '#4CAF50'
-    };
-    return colors[level as keyof typeof colors];
-}
+    private initializeLevelUI(): void {
+        this.updateLevelDisplay();
+        this.initializeLevelButtons();
+    }
 
-private setNikudPreset(nikudList: string[]): void {
-    // Update checkboxes in UI
-    document.querySelectorAll('.nikud-toggle input').forEach(checkbox => {
-        if (checkbox instanceof HTMLInputElement) {
-            const nikud = checkbox.dataset.nikud;
-            checkbox.checked = nikudList.includes(nikud || '');
-            if (nikud) {
-                updateNikudSettings(nikud, checkbox.checked);
-            }
+    private updateLevelDisplay(): void {
+        const currentLevel = this.levelManager.getCurrentLevel();
+        const progress = this.levelManager.getCurrentLevelProgress();
+        
+        if (!currentLevel || !progress) return;
+
+        // Update level info display
+        const levelNameElement = document.getElementById('current-level-name');
+        const levelDescElement = document.getElementById('current-level-description');
+        const levelProgressElement = document.getElementById('level-progress');
+        
+        if (levelNameElement) {
+            levelNameElement.textContent = currentLevel.name;
         }
-    });
-    this.showNextLetter();
-}
-
-private initializeHandlers(): void {
-    console.log('Initializing handlers');
-    (window as any).gameHandlers = {
-        setPreset: (level: string) => {
-            switch(level) {
-                case 'beginner':
-                    this.setNikudPreset(['Qamats', 'Patah', 'Hiriq']);
-                    break;
-                case 'intermediate':
-                    this.setNikudPreset(['Qamats', 'Patah', 'Hiriq', 'Tsere', 'Segol', 'Kubutz']);
-                    break;
-                case 'advanced':
-                    this.setNikudPreset(['Qamats', 'Patah', 'Hiriq', 'Tsere', 'Segol', 'Kubutz', 'Sheva', 'Holam', 'FullShuruk', 'FullHolam']);
-                    break;
-            }
-        },
-
-        handleCorrect: () => {
-            console.log('Correct clicked');
-            this.handleAssessment(true);
-        },
-        handleIncorrect: () => {
-            console.log('Incorrect clicked');
-            this.handleAssessment(false);
-        },
-        updateNikudSettings: (nikud: string, enabled: boolean) => {
-            console.log(`Updating Nikud settings: ${nikud} -> ${enabled}`);
-            updateNikudSettings(nikud, enabled);
-            this.showNextLetter();
+        
+        if (levelDescElement) {
+            levelDescElement.textContent = currentLevel.description;
         }
-    };
-}
+        
+        if (levelProgressElement) {
+            const completion = this.levelManager.getCompletionPercentage(currentLevel.id);
+            levelProgressElement.textContent = `${progress.correctAnswers}/${currentLevel.completionRequirement} (${completion.toFixed(0)}%)`;
+        }
+    }
+
+    private initializeLevelButtons(): void {
+        const levelSelectButton = document.getElementById('level-select-btn');
+        if (levelSelectButton) {
+            levelSelectButton.addEventListener('click', () => this.showLevelSelector());
+        }
+    }
+
+    private showLevelSelector(): void {
+        // Create level selector modal
+        const modal = document.createElement('div');
+        modal.className = 'level-selector-modal';
+        modal.innerHTML = this.generateLevelSelectorHTML();
+        
+        document.body.appendChild(modal);
+        
+        // Add event listeners
+        this.attachLevelSelectorEvents(modal);
+    }
+
+    private generateLevelSelectorHTML(): string {
+        const levels = this.levelManager.getAllLevels();
+        const unlockedLevels = this.levelManager.getUnlockedLevels();
+        
+        let html = `
+            <div class="level-selector-content">
+                <div class="level-selector-header">
+                    <h2>בחר רמה</h2>
+                    <button class="close-modal">×</button>
+                </div>
+                <div class="levels-grid">
+        `;
+        
+        levels.forEach(level => {
+            const progress = this.levelManager.getLevelProgress(level.id);
+            const isUnlocked = unlockedLevels.some(ul => ul.id === level.id);
+            const completion = this.levelManager.getCompletionPercentage(level.id);
+            
+            html += `
+                <div class="level-card ${isUnlocked ? 'unlocked' : 'locked'} ${progress?.isCompleted ? 'completed' : ''}" 
+                     data-level-id="${level.id}">
+                    <div class="level-icon">${level.icon}</div>
+                    <div class="level-info">
+                        <h3>${level.name}</h3>
+                        <p>${level.description}</p>
+                        <div class="level-progress-bar">
+                            <div class="progress-fill" style="width: ${completion}%"></div>
+                        </div>
+                        <div class="level-stats">
+                            ${progress ? `${progress.correctAnswers}/${level.completionRequirement}` : '0/0'}
+                        </div>
+                    </div>
+                    ${!isUnlocked ? '<div class="lock-overlay">🔒</div>' : ''}
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+        
+        return html;
+    }
+
+    private attachLevelSelectorEvents(modal: HTMLElement): void {
+        // Close button
+        const closeButton = modal.querySelector('.close-modal');
+        closeButton?.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        
+        // Level cards
+        const levelCards = modal.querySelectorAll('.level-card.unlocked');
+        levelCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const levelId = card.getAttribute('data-level-id');
+                if (levelId && this.levelManager.setCurrentLevel(levelId)) {
+                    this.updateLevelDisplay();
+                    this.letterDisplay.updateDisplayedLetter();
+                    document.body.removeChild(modal);
+                }
+            });
+        });
+    }
 
     private updateCounter(): void {
-        const counterElement = document.getElementById('counter');
+        const counterElement = document.getElementById('letters-count');
         if (counterElement) {
             counterElement.textContent = this.lettersShown.toString();
         }
-    }
-    
-    public startGame(): void {
-        console.log('Game started');
-        this.lettersShown = 0;
-        this.updateCounter();
-        this.letterDisplay.updateDisplayedLetter();
     }
 
     private showNextLetter(): void {
         this.letterDisplay.updateDisplayedLetter();
     }
 
+    public startGame(): void {
+        console.log('Starting Hebrew Reading Game with Level System');
+        this.letterDisplay.updateDisplayedLetter();
+        this.updateLevelDisplay();
+        
+        // Initialize game handlers for global access
+        (window as any).gameHandlers = {
+            handleCorrect: () => this.handleAssessment(true),
+            handleIncorrect: () => this.handleAssessment(false),
+            setPreset: (preset: string) => this.setNikudPreset(preset),
+            clearCurrentLevel: () => this.clearCurrentLevel(),
+            clearAllLevels: () => this.clearAllLevels(),
+            resetAllProgress: () => this.resetAllProgress()
+        };
+    }
 
-   
+    private setNikudPreset(preset: string): void {
+        // Legacy support for existing preset system
+        const presets = {
+            beginner: ['Patah', 'Qamats', 'Hiriq'],
+            intermediate: ['Patah', 'Qamats', 'Hiriq', 'Tsere', 'Segol'],
+            advanced: ['Patah', 'Qamats', 'Hiriq', 'Tsere', 'Segol', 'Sheva', 'Holam', 'FullShuruk']
+        };
+        
+        // This could be enhanced to work with levels in the future
+        console.log(`Setting preset: ${preset}`, presets[preset as keyof typeof presets]);
+    }    private showLevelCompletionMessage(autoAdvanced: boolean): void {
+        const message = autoAdvanced 
+            ? '🎉 כל הכבוד! השלמת את הרמה ועברת לרמה הבאה! 🎉'
+            : '🎉 כל הכבוד! השלמת את הרמה! 🎉';
+        
+        this.showAchievementBanner({ title: 'Level Completed', description: message });
+        
+        // Play achievement sound
+        if (this.soundsEnabled) {
+            const achievementSounds = this.soundFiles.achievement;
+            const sound = achievementSounds[Math.floor(Math.random() * achievementSounds.length)];
+            sound.play().catch(e => console.log('Could not play achievement sound'));
+        }
+    }
+
+    private updateLevelUI(): void {
+        // Update the level display and progress
+        this.initializeLevelUI();
+        
+        // Refresh the letter display to use the new level configuration
+        // Generate a new letter for the new level
+        this.letterDisplay.updateDisplayedLetter();
+    }
+
+    public clearCurrentLevel(): void {
+        this.levelManager.clearCurrentLevelProgress();
+        this.updateLevelDisplay();
+        this.showNextLetter();
+        this.showSuccessMessage('🗑️ התקדמות הרמה הנוכחית נמחקה');
+    }
+
+    public clearAllLevels(): void {
+        this.levelManager.clearAllLevelsProgress();
+        this.updateLevelDisplay();
+        this.showNextLetter();
+        this.showSuccessMessage('🗑️ התקדמות כל הרמות נמחקה');
+    }
+
+    public resetAllProgress(): void {
+        this.levelManager.resetProgress();
+        this.updateLevelDisplay();
+        this.updateLevelUI();
+        this.showSuccessMessage('🔄 כל ההתקדמות אופסה והמשחק התחיל מההתחלה');
+    }
 }

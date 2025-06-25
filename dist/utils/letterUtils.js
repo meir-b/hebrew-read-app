@@ -38,18 +38,6 @@ const DAGESH_LETTERS = [
     HEBREW_LETTERS['פ'],
     HEBREW_LETTERS['ת']
 ];
-const NIKUD_LIST = [
-    { nikud: getNikudNameToStr("Kubutz"), name: "Kubutz" },
-    { nikud: getNikudNameToStr("Sheva"), name: "Sheva" },
-    { nikud: getNikudNameToStr("Hiriq"), name: "Hiriq" },
-    { nikud: getNikudNameToStr("Tsere"), name: "Tsere" },
-    { nikud: getNikudNameToStr("Segol"), name: "Segol" },
-    { nikud: getNikudNameToStr("Patah"), name: "Patah" },
-    { nikud: getNikudNameToStr("Qamats"), name: "Qamats" },
-    { nikud: getNikudNameToStr("Holam"), name: "Holam" },
-    { nikud: getNikudNameToStr("FullShuruk"), name: "Shuruk" },
-    { nikud: getNikudNameToStr("FullHolam"), name: "Holam Malei" }
-];
 function getNikudNameToStr(name) {
     if (name === "Sheva") {
         return String.fromCodePoint(NIKUD_CODES["Sheva"]);
@@ -85,6 +73,18 @@ function getNikudNameToStr(name) {
     console.error("Invalid nikud name");
     return "";
 }
+const NIKUD_LIST = [
+    { nikud: getNikudNameToStr("Kubutz"), name: "Kubutz" },
+    { nikud: getNikudNameToStr("Sheva"), name: "Sheva" },
+    { nikud: getNikudNameToStr("Hiriq"), name: "Hiriq" },
+    { nikud: getNikudNameToStr("Tsere"), name: "Tsere" },
+    { nikud: getNikudNameToStr("Segol"), name: "Segol" },
+    { nikud: getNikudNameToStr("Patah"), name: "Patah" },
+    { nikud: getNikudNameToStr("Qamats"), name: "Qamats" },
+    { nikud: getNikudNameToStr("Holam"), name: "Holam" },
+    { nikud: getNikudNameToStr("FullShuruk"), name: "Shuruk" },
+    { nikud: getNikudNameToStr("FullHolam"), name: "Holam Malei" }
+];
 class HebrewLetterGenerator {
     static generateRandomLetter() {
         const letters = Object.keys(HEBREW_LETTERS);
@@ -205,6 +205,237 @@ class HebrewLetterGenerator {
 HebrewLetterGenerator.recentLetters = [];
 HebrewLetterGenerator.recentNikud = [];
 HebrewLetterGenerator.MAX_RECENT = 4; // Keep track of last 4 to avoid repetition
+// Combination generator for systematic generation of all possible combinations
+class SystematicCombinationGenerator {
+    getAllCombinations(config) {
+        var _a, _b;
+        const combinations = [];
+        // Determine letter options
+        const letter1Options = config.fixedFirstChar ? [config.fixedFirstChar] : config.letterRange;
+        const letter2Options = config.letterRange;
+        // Determine nikud options
+        let nikud1Options;
+        let nikud2Options;
+        if (config.isRandomOrder) {
+            // Random order: filter out Sheva for first position
+            nikud1Options = config.allowedVowels.filter(vowel => vowel !== 'Sheva');
+            nikud2Options = config.allowedVowels;
+        }
+        else {
+            // Ordered: use specific positions
+            nikud1Options = ((_a = config.orderedVowels) === null || _a === void 0 ? void 0 : _a[0]) || config.allowedVowels;
+            nikud2Options = ((_b = config.orderedVowels) === null || _b === void 0 ? void 0 : _b[1]) || config.allowedVowels;
+        }
+        // Generate all combinations
+        for (const letter1 of letter1Options) {
+            for (const letter2 of letter2Options) {
+                for (const nikud1 of nikud1Options) {
+                    for (const nikud2 of nikud2Options) {
+                        combinations.push({ letter1, letter2, nikud1, nikud2 });
+                    }
+                }
+            }
+        }
+        return combinations;
+    }
+    getNextCombination(config, currentIndex) {
+        const allCombinations = this.getAllCombinations(config);
+        if (currentIndex >= 0 && currentIndex < allCombinations.length) {
+            return allCombinations[currentIndex];
+        }
+        return null;
+    }
+}
+class LevelAwareGenerator {
+    static generateForLevel(config, levelId) {
+        if (config.vowelCount === 1) {
+            return this.generateSingleVowelSyllable(config);
+        }
+        else if (config.vowelCount === 2) {
+            return this.generateDoubleVowelSyllable(config, levelId);
+        }
+        else if (config.vowelCount === 3) {
+            return this.generateTripleVowelSyllable(config);
+        }
+        else {
+            // Mixed - randomly choose between 1, 2, or 3 vowels
+            const vowelCount = Math.floor(Math.random() * 3) + 1;
+            return this.generateForLevel(Object.assign(Object.assign({}, config), { vowelCount }), levelId);
+        }
+    }
+    static generateSingleVowelSyllable(config) {
+        const letter = this.getRandomLetter(config.letterRange);
+        const nikud = this.getRandomNikud(config.allowedVowels);
+        let result = letter;
+        // Add dagesh if appropriate
+        if (config.includeDagesh && this.shouldAddDagesh(letter)) {
+            result += String.fromCodePoint(DAGESH_CODE);
+        }
+        // Add shin/sin dot
+        if (letter === 'ש') {
+            const randomDot = Math.random() < 0.5 ? SHIN_SIN_DOTS[0] : SHIN_SIN_DOTS[1];
+            result += String.fromCodePoint(randomDot);
+        }
+        result += nikud;
+        return {
+            charector: result,
+            nikud: nikud
+        };
+    }
+    static generateDoubleVowelSyllable(config, levelId) {
+        // Handle fixed first character - if fixedFirstChar is set, use it for first letter, otherwise random
+        const letter1 = config.fixedFirstChar || this.getRandomLetter(config.letterRange);
+        // Second letter is always random from the letter range
+        const letter2 = this.getRandomLetter(config.letterRange);
+        let nikud1, nikud2;
+        // Handle all combinations generation vs random generation
+        if (config.generateAllCombinations) {
+            // For all combinations mode, we need to track which combination to generate
+            // This is a simplified implementation - in a real scenario, you'd want 
+            // to track the current combination index and cycle through all possibilities
+            if (config.isRandomOrder) {
+                const firstVowelOptions = config.allowedVowels.filter(vowel => vowel !== 'Sheva');
+                nikud1 = this.getRandomNikudFromList(firstVowelOptions.length > 0 ? firstVowelOptions : config.allowedVowels);
+                nikud2 = this.getRandomNikud(config.allowedVowels);
+            }
+            else {
+                if (config.orderedVowels && config.orderedVowels.length >= 2) {
+                    nikud1 = this.getRandomNikudFromList(config.orderedVowels[0]);
+                    nikud2 = this.getRandomNikudFromList(config.orderedVowels[1]);
+                }
+                else {
+                    const firstVowelOptions = config.allowedVowels.filter(vowel => vowel !== 'Sheva');
+                    nikud1 = this.getRandomNikudFromList(firstVowelOptions.length > 0 ? firstVowelOptions : config.allowedVowels);
+                    nikud2 = this.getRandomNikud(config.allowedVowels);
+                }
+            }
+        }
+        else {
+            // Standard random/ordered generation
+            if (config.isRandomOrder) {
+                // Random order: Hebrew linguistic rule - Sheva cannot be the first vowel in multi-character syllables
+                // as it represents a silent or very reduced vowel that typically appears in the middle or end of words
+                const firstVowelOptions = config.allowedVowels.filter(vowel => vowel !== 'Sheva');
+                nikud1 = this.getRandomNikudFromList(firstVowelOptions.length > 0 ? firstVowelOptions : config.allowedVowels);
+                nikud2 = this.getRandomNikud(config.allowedVowels);
+            }
+            else {
+                // Ordered placement: use specific nikud for each position
+                if (config.orderedVowels && config.orderedVowels.length >= 2) {
+                    nikud1 = this.getRandomNikudFromList(config.orderedVowels[0]);
+                    nikud2 = this.getRandomNikudFromList(config.orderedVowels[1]);
+                }
+                else {
+                    // Fallback to random if orderedVowels not properly configured
+                    const firstVowelOptions = config.allowedVowels.filter(vowel => vowel !== 'Sheva');
+                    nikud1 = this.getRandomNikudFromList(firstVowelOptions.length > 0 ? firstVowelOptions : config.allowedVowels);
+                    nikud2 = this.getRandomNikud(config.allowedVowels);
+                }
+            }
+        }
+        let syllable = '';
+        // First letter with nikud
+        syllable += letter1;
+        if (config.includeDagesh && this.shouldAddDagesh(letter1)) {
+            syllable += String.fromCodePoint(DAGESH_CODE);
+        }
+        if (letter1 === 'ש') {
+            const randomDot = Math.random() < 0.5 ? SHIN_SIN_DOTS[0] : SHIN_SIN_DOTS[1];
+            syllable += String.fromCodePoint(randomDot);
+        }
+        syllable += nikud1;
+        // Second letter with nikud
+        syllable += letter2;
+        if (config.includeDagesh && this.shouldAddDagesh(letter2)) {
+            syllable += String.fromCodePoint(DAGESH_CODE);
+        }
+        if (letter2 === 'ש') {
+            const randomDot = Math.random() < 0.5 ? SHIN_SIN_DOTS[0] : SHIN_SIN_DOTS[1];
+            syllable += String.fromCodePoint(randomDot);
+        }
+        syllable += nikud2;
+        return {
+            charector: syllable,
+            nikud: nikud1 + ', ' + nikud2
+        };
+    }
+    static generateTripleVowelSyllable(config) {
+        const letters = [
+            this.getRandomLetter(config.letterRange),
+            this.getRandomLetter(config.letterRange),
+            this.getRandomLetter(config.letterRange)
+        ];
+        let nikuds;
+        if (config.isRandomOrder) {
+            // Random order: Hebrew linguistic rule - Sheva cannot be the first vowel in multi-character syllables
+            const firstVowelOptions = config.allowedVowels.filter(vowel => vowel !== 'Sheva');
+            nikuds = [
+                this.getRandomNikudFromList(firstVowelOptions.length > 0 ? firstVowelOptions : config.allowedVowels),
+                this.getRandomNikud(config.allowedVowels),
+                this.getRandomNikud(config.allowedVowels)
+            ];
+        }
+        else {
+            // Ordered placement: use specific nikud for each position
+            if (config.orderedVowels && config.orderedVowels.length >= 3) {
+                nikuds = [
+                    this.getRandomNikudFromList(config.orderedVowels[0]),
+                    this.getRandomNikudFromList(config.orderedVowels[1]),
+                    this.getRandomNikudFromList(config.orderedVowels[2])
+                ];
+            }
+            else {
+                // Fallback to random if orderedVowels not properly configured
+                const firstVowelOptions = config.allowedVowels.filter(vowel => vowel !== 'Sheva');
+                nikuds = [
+                    this.getRandomNikudFromList(firstVowelOptions.length > 0 ? firstVowelOptions : config.allowedVowels),
+                    this.getRandomNikud(config.allowedVowels),
+                    this.getRandomNikud(config.allowedVowels)
+                ];
+            }
+        }
+        let syllable = '';
+        for (let i = 0; i < 3; i++) {
+            const letter = letters[i];
+            const nikud = nikuds[i];
+            syllable += letter;
+            if (config.includeDagesh && this.shouldAddDagesh(letter)) {
+                syllable += String.fromCodePoint(DAGESH_CODE);
+            }
+            if (letter === 'ש') {
+                const randomDot = Math.random() < 0.5 ? SHIN_SIN_DOTS[0] : SHIN_SIN_DOTS[1];
+                syllable += String.fromCodePoint(randomDot);
+            }
+            syllable += nikud;
+        }
+        return {
+            charector: syllable,
+            nikud: nikuds.join(', ')
+        };
+    }
+    static getRandomNikudFromList(allowedVowels) {
+        const randomIndex = Math.floor(Math.random() * allowedVowels.length);
+        const nikudName = allowedVowels[randomIndex];
+        return getNikudNameToStr(nikudName);
+    }
+    static getRandomLetter(letterRange) {
+        const randomIndex = Math.floor(Math.random() * letterRange.length);
+        return letterRange[randomIndex];
+    }
+    static getRandomNikud(allowedVowels) {
+        const randomIndex = Math.floor(Math.random() * allowedVowels.length);
+        const nikudName = allowedVowels[randomIndex];
+        return getNikudNameToStr(nikudName);
+    }
+    static shouldAddDagesh(letter) {
+        const isDageshLetter = DAGESH_LETTERS.includes(HEBREW_LETTERS[letter]);
+        return isDageshLetter && Math.random() < 0.3; // 30% chance for dagesh
+    }
+}
+LevelAwareGenerator.recentSyllables = [];
+LevelAwareGenerator.MAX_RECENT_SYLLABLES = 3;
+LevelAwareGenerator.combinationGenerator = new SystematicCombinationGenerator();
+LevelAwareGenerator.combinationIndexes = new Map(); // Track combination index per level
 // Add a function to update settings
 export function updateNikudSettings(nikud, enabled) {
     if (nikud in HEBREW_SETTINGS) {
@@ -213,4 +444,4 @@ export function updateNikudSettings(nikud, enabled) {
         console.log('Current settings:', HEBREW_SETTINGS);
     }
 }
-export { HebrewLetterGenerator, getNikudNameToStr, NIKUD_LIST };
+export { HebrewLetterGenerator, LevelAwareGenerator, getNikudNameToStr, NIKUD_LIST, SystematicCombinationGenerator };

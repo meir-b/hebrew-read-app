@@ -1,8 +1,9 @@
-import { HebrewLetterGenerator, NIKUD_LIST } from '../utils/letterUtils.js';
+import { LevelAwareGenerator, NIKUD_LIST } from '../utils/letterUtils.js';
 class HebrewLetterDisplay {
-    constructor(statistics) {
+    constructor(statistics, levelManager) {
         this.statistics = statistics;
-        this.currentLetter = HebrewLetterGenerator.generateNextCharacter();
+        this.levelManager = levelManager;
+        this.currentLetter = this.generateLevelAwareLetter();
     }
     getNikudList() {
         return NIKUD_LIST;
@@ -14,33 +15,13 @@ class HebrewLetterDisplay {
         const found = NIKUD_LIST.find(item => item.nikud === nikud);
         return found ? found.name : "Unknown Nikud";
     }
+    generateLevelAwareLetter() {
+        const config = this.levelManager.getLevelConfig();
+        return LevelAwareGenerator.generateForLevel(config);
+    }
     updateDisplayedLetter() {
-        const weights = this.calculateNikudWeights();
-        console.log("weights:", weights);
-        this.currentLetter = HebrewLetterGenerator.generateNextCharacter(weights);
+        this.currentLetter = this.generateLevelAwareLetter();
         this.render();
-    }
-    calculateNikudWeights() {
-        const performance = this.statistics.calculateOverallPerformance();
-        console.log("performance:", performance);
-        const weights = {};
-        const leastPracticedNikud = this.findLeastPracticedNikud();
-        console.log("leastPracticedNikud:", leastPracticedNikud);
-        return weights;
-    }
-    findLeastPracticedNikud() {
-        var _a;
-        const nikudCounts = NIKUD_LIST.map(n => {
-            var _a, _b;
-            return ({
-                nikud: n.nikud,
-                total: (_b = (_a = this.statistics.getStatistics(n.nikud)) === null || _a === void 0 ? void 0 : _a.total) !== null && _b !== void 0 ? _b : 0
-            });
-        });
-        const leastPracticed = nikudCounts
-            .filter(n => n.total < HebrewLetterDisplay.MIN_EXPOSURE_COUNT)
-            .sort((a, b) => a.total - b.total)[0];
-        return (_a = leastPracticed === null || leastPracticed === void 0 ? void 0 : leastPracticed.nikud) !== null && _a !== void 0 ? _a : null;
     }
     render() {
         const letterElement = document.querySelector('.letter-display');

@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
+<html lang="he" dir="rtl"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>לומדים לקרוא - משחק ניקוד</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <style>
         /* Root Variables */
         :root {
@@ -31,16 +29,16 @@
             --letter-color: #000000;
         }
 
-        /* Base Styles */
+        /* Base Styles - Mobile First */
         body {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
             margin: 0;
-            padding: 2rem;
+            padding: 1rem;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2rem;
+            gap: 1rem;
             background: 
                 radial-gradient(circle at 20% 20%, var(--background-start) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, var(--background-end) 0%, transparent 50%),
@@ -49,18 +47,20 @@
             color: var(--text-primary);
         }
 
-        /* Display Area */
+        /* Display Area - Mobile First */
         #display-area {
-            font-size: 12rem;
-            padding: 3rem;
-            border-radius: 3rem;
+            font-size: 6rem;
+            padding: 1.5rem;
+            border-radius: 2rem;
             background: white;
-            border: 8px solid var(--color-yellow);
+            border: 4px solid var(--color-yellow);
             box-shadow: 
-                0 0 0 4px white,
-                0 20px 40px rgba(0, 0, 0, 0.1);
-            min-width: 400px;
-            height: 500px;
+                0 0 0 2px white,
+                0 10px 20px rgba(0, 0, 0, 0.1);
+            width: calc(100vw - 2rem);
+            max-width: 350px;
+            height: auto;
+            min-height: 300px;
             display: grid;
             place-items: center;
             transform-style: preserve-3d;
@@ -73,18 +73,18 @@
         #display-area::after {
             content: '✨';
             position: absolute;
-            font-size: 2rem;
+            font-size: 1.5rem;
             animation: twinkle 1.5s ease-in-out infinite alternate;
         }
 
         #display-area::before {
-            top: -1rem;
-            left: -1rem;
+            top: -0.5rem;
+            left: -0.5rem;
         }
 
         #display-area::after {
-            bottom: -1rem;
-            right: -1rem;
+            bottom: -0.5rem;
+            right: -0.5rem;
         }
 
         .letter-display {
@@ -93,72 +93,196 @@
             position: relative;
             z-index: 2;
             background: white;
-            padding: 2rem;
+            padding: 1rem;
             border-radius: 1rem;
+            text-align: center;
         }
 
-        /* Controls */
+        /* Tablet and larger screens */
+        @media (min-width: 768px) {
+            body {
+                padding: 1.5rem;
+                gap: 1.5rem;
+            }
+            
+            #display-area {
+                font-size: 8rem;
+                padding: 2rem;
+                border: 6px solid var(--color-yellow);
+                max-width: 450px;
+                min-height: 350px;
+            }
+            
+            #display-area::before,
+            #display-area::after {
+                font-size: 1.75rem;
+            }
+            
+            .letter-display {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Desktop screens */
+        @media (min-width: 1024px) {
+            body {
+                padding: 2rem;
+                gap: 2rem;
+            }
+            
+            #display-area {
+                font-size: 12rem;
+                padding: 3rem;
+                border: 8px solid var(--color-yellow);
+                max-width: 500px;
+                min-height: 400px;
+            }
+            
+            #display-area::before,
+            #display-area::after {
+                font-size: 2rem;
+                top: -1rem;
+                left: -1rem;
+            }
+            
+            #display-area::after {
+                bottom: -1rem;
+                right: -1rem;
+            }
+            
+            .letter-display {
+                padding: 2rem;
+            }
+        }
+
+        /* Controls - Mobile First */
         .controls {
             display: flex;
-            gap: 1.5rem;
-            margin-top: 2rem;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+            width: 100%;
+            max-width: 350px;
         }
 
         button {
-            padding: 1.5rem 3rem;
-            font-size: 1.5rem;
+            padding: 1rem 2rem;
+            font-size: 1.25rem;
             font-weight: 600;
             border: none;
-            border-radius: 2rem;
+            border-radius: 1.5rem;
             cursor: pointer;
             color: white;
-            min-width: 200px;
+            width: 100%;
             transform-style: preserve-3d;
             transition: var(--transition);
+            touch-action: manipulation;
         }
 
         .correct-btn {
             background: linear-gradient(135deg, var(--color-green), #8BC34A);
             box-shadow: 
-                0 8px 0 #2E7D32,
-                0 8px 15px rgba(0,0,0,0.1);
+                0 4px 0 #2E7D32,
+                0 4px 8px rgba(0,0,0,0.1);
         }
 
         .incorrect-btn {
             background: linear-gradient(135deg, var(--color-red), var(--color-orange));
             box-shadow: 
-                0 8px 0 #C62828,
-                0 8px 15px rgba(0,0,0,0.1);
+                0 4px 0 #C62828,
+                0 4px 8px rgba(0,0,0,0.1);
         }
 
         button:active {
-            transform: translateY(8px);
+            transform: translateY(4px);
             box-shadow: 0 0 0 #2E7D32;
         }
 
-        /* Success Messages */
+        /* Tablet and larger - side by side controls */
+        @media (min-width: 768px) {
+            .controls {
+                flex-direction: row;
+                gap: 1.5rem;
+                max-width: 500px;
+            }
+            
+            button {
+                padding: 1.25rem 2.5rem;
+                font-size: 1.4rem;
+                min-width: 180px;
+            }
+            
+            .correct-btn, .incorrect-btn {
+                box-shadow: 
+                    0 6px 0 #2E7D32,
+                    0 6px 12px rgba(0,0,0,0.1);
+            }
+            
+            .incorrect-btn {
+                box-shadow: 
+                    0 6px 0 #C62828,
+                    0 6px 12px rgba(0,0,0,0.1);
+            }
+            
+            button:active {
+                transform: translateY(6px);
+            }
+        }
+
+        /* Desktop */
+        @media (min-width: 1024px) {
+            .controls {
+                margin-top: 2rem;
+            }
+            
+            button {
+                padding: 1.5rem 3rem;
+                font-size: 1.5rem;
+                min-width: 200px;
+            }
+            
+            .correct-btn, .incorrect-btn {
+                box-shadow: 
+                    0 8px 0 #2E7D32,
+                    0 8px 15px rgba(0,0,0,0.1);
+            }
+            
+            .incorrect-btn {
+                box-shadow: 
+                    0 8px 0 #C62828,
+                    0 8px 15px rgba(0,0,0,0.1);
+            }
+            
+            button:active {
+                transform: translateY(8px);
+            }
+        }
+
+        /* Success Messages - Mobile First */
         .success-message {
             position: fixed;
-            top: 2rem;
+            top: 1rem;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, var(--color-yellow), var(--color-orange));
             color: white;
-            padding: 1rem 2rem;
+            padding: 0.75rem 1.5rem;
             border-radius: 1rem;
-            font-size: 3rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            border: 4px solid white;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 2px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             animation: successPopup 1.5s ease-out forwards;
             z-index: 1000;
+            max-width: 90vw;
+            text-align: center;
         }
 
-        /* Streak Counter */
+        /* Streak Counter - Mobile First */
         .streak-counter {
             position: fixed;
-            top: 1rem;
-            left: 1rem;
+            top: 0.5rem;
+            left: 0.5rem;
             background: linear-gradient(
                 45deg,
                 var(--color-red),
@@ -171,22 +295,61 @@
             background-size: 200% 200%;
             animation: rainbow 2s linear infinite;
             color: white;
-            padding: 1rem 2rem;
-            border-radius: 1rem;
-            font-size: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 1.25rem;
             font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            border: 4px solid white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            gap: 0.25rem;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        /* Settings Panel */
+        @media (min-width: 768px) {
+            .success-message {
+                top: 1.5rem;
+                padding: 1rem 2rem;
+                font-size: 2rem;
+                border: 3px solid white;
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            }
+            
+            .streak-counter {
+                top: 0.75rem;
+                left: 0.75rem;
+                padding: 0.75rem 1.5rem;
+                border-radius: 1rem;
+                font-size: 1.5rem;
+                gap: 0.4rem;
+                border: 3px solid white;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .success-message {
+                top: 2rem;
+                padding: 1rem 2rem;
+                font-size: 3rem;
+                border: 4px solid white;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            }
+            
+            .streak-counter {
+                top: 1rem;
+                left: 1rem;
+                padding: 1rem 2rem;
+                font-size: 2rem;
+                gap: 0.5rem;
+                border: 4px solid white;
+            }
+        }
+
+        /* Settings Panel - Mobile First */
         .settings-panel {
             position: fixed;
-            top: 1rem;
-            right: 1rem;
+            top: 0.5rem;
+            right: 0.5rem;
             z-index: 1001;
         }
 
@@ -194,32 +357,366 @@
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-size: 1.25rem;
+            padding: 0.4rem 0.8rem;
+            font-size: 1rem;
             cursor: pointer;
+            touch-action: manipulation;
         }
 
         .settings-content {
-            position: absolute;
-            top: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
             right: 0;
-            margin-top: 0.5rem;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .settings-content > div {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 1rem;
             padding: 1.5rem;
             box-shadow: var(--card-shadow);
-            min-width: 300px;
-            transform: scale(0.95);
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
+            width: 100%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .settings-content.show {
             transform: scale(1);
             opacity: 1;
             visibility: visible;
+        }
+
+        @media (min-width: 768px) {
+            .settings-panel {
+                top: 0.75rem;
+                right: 0.75rem;
+            }
+            
+            .settings-toggle {
+                padding: 0.5rem 1rem;
+                font-size: 1.1rem;
+            }
+            
+            .settings-content {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                left: auto;
+                bottom: auto;
+                margin-top: 0.5rem;
+                background: transparent;
+                padding: 0;
+                display: block;
+            }
+            
+            .settings-content > div {
+                width: auto;
+                min-width: 350px;
+                max-height: none;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .settings-panel {
+                top: 1rem;
+                right: 1rem;
+            }
+            
+            .settings-toggle {
+                padding: 0.5rem 1rem;
+                font-size: 1.25rem;
+            }
+            
+            .settings-content > div {
+                min-width: 400px;
+                padding: 2rem;
+            }
+        }
+
+        /* Level Panel Styles - Mobile First */
+        .level-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(20px);
+            width: calc(100% - 2rem);
+            max-width: 350px;
+        }
+
+        .level-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .level-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            line-height: 1.3;
+        }
+
+        .level-select-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            touch-action: manipulation;
+            align-self: flex-start;
+        }
+
+        .level-info p {
+            margin: 0 0 0.75rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .level-progress {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        @media (min-width: 768px) {
+            .level-panel {
+                padding: 1.25rem;
+                margin-top: 1.5rem;
+                margin-bottom: 1.5rem;
+                max-width: 450px;
+            }
+            
+            .level-header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .level-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .level-select-button {
+                padding: 0.6rem 1.2rem;
+                font-size: 1rem;
+                align-self: auto;
+            }
+            
+            .level-info p {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .level-progress {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .level-panel {
+                padding: 1.5rem;
+                margin-top: 2rem;
+                margin-bottom: 2rem;
+                max-width: 600px;
+            }
+            
+            .level-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .level-select-button {
+                padding: 0.75rem 1.5rem;
+                font-size: 1.1rem;
+            }
+            
+            .level-info p {
+                font-size: 1.1rem;
+            }
+            
+            .level-progress {
+                font-size: 1rem;
+            }
+        }
+
+        .level-select-button:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .level-info p {
+            margin: 0 0 1rem 0;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .level-progress {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Level Selector Modal */
+        .level-selector-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .level-selector-content {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 800px;
+            max-height: 80vh;
+            width: 90%;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .level-selector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 1rem;
+        }
+
+        .level-selector-header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .level-card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-card.unlocked:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .level-card.completed {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(107, 203, 119, 0.1) 100%);
+        }
+
+        .level-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .level-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .level-info h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .level-info p {
+            margin: 0 0 1rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .level-progress-bar {
+            background: var(--card-border);
+            border-radius: 1rem;
+            height: 0.5rem;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            height: 100%;
+            border-radius: 1rem;
+            transition: width 0.3s ease;
+        }
+
+        .level-stats {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .lock-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            opacity: 0.7;
         }
 
         /* Animations */
@@ -243,6 +740,47 @@
             20% { transform: translateX(-50%) translateY(0); opacity: 1; }
             80% { transform: translateX(-50%) translateY(0); opacity: 1; }
             100% { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+        }
+
+        @keyframes achievementPopup {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            10% { transform: translate(-50%, -50%) scale(1.2); }
+            20% { transform: translate(-50%, -50%) scale(1); }
+            80% { transform: translate(-50%, -50%) scale(1); }
+            100% { transform: translate(-50%, -50%) scale(0); }
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg) scale(0); }
+            10% { transform: translateY(10px) rotate(45deg) scale(1); }
+            100% { transform: translateY(100vh) rotate(720deg) scale(0); }
+        }
+
+        @keyframes starPop {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes milestonePopup {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.5) rotate(-5deg);
+                opacity: 0;
+                visibility: visible;
+            }
+            20% { 
+                transform: translate(-50%, -50%) scale(1.2) rotate(3deg);
+                opacity: 1;
+            }
+            80% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(-50%, -50%) translateY(-100px);
+                opacity: 0;
+                visibility: hidden;
+            }
         }
 
         /* Mobile Adjustments */
@@ -269,7 +807,6 @@
                 min-width: unset;
             }
         }
-
 
         /* Add these new style sections */
         .achievement-banner {
@@ -342,434 +879,391 @@
             animation: milestonePopup 2s ease-out forwards;
         }
 
-        /* Add these new keyframe animations */
-        @keyframes achievementPopup {
-            0% { transform: translate(-50%, -50%) scale(0); }
-            10% { transform: translate(-50%, -50%) scale(1.2); }
-            20% { transform: translate(-50%, -50%) scale(1); }
-            80% { transform: translate(-50%, -50%) scale(1); }
-            100% { transform: translate(-50%, -50%) scale(0); }
-        }
-
-        @keyframes confettiFall {
-            0% { transform: translateY(0) rotate(0deg) scale(0); }
-            10% { transform: translateY(10px) rotate(45deg) scale(1); }
-            100% { transform: translateY(100vh) rotate(720deg) scale(0); }
-        }
-
-        @keyframes starPop {
-            0% { transform: scale(0) rotate(0deg); opacity: 1; }
-            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
-            100% { transform: scale(0) rotate(360deg); opacity: 0; }
-        }
-
-        @keyframes milestonePopup {
-            0% { 
-                transform: translate(-50%, -50%) scale(0.5) rotate(-5deg);
-                opacity: 0;
-                visibility: visible;
-            }
-            20% { 
-                transform: translate(-50%, -50%) scale(1.2) rotate(3deg);
-                opacity: 1;
-            }
-            80% {
-                transform: translate(-50%, -50%) scale(1) rotate(0deg);
-                opacity: 1;
-            }
-            100% { 
-                transform: translate(-50%, -50%) translateY(-100px);
-                opacity: 0;
-                visibility: hidden;
-            }
-        }
-
         /* Add to your CSS */
-.statistics-panel {
-    background: var(--card-bg);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    margin-top: 2rem;
-    box-shadow: var(--card-shadow);
-    width: 90%;
-    max-width: 800px;
-}
+        .statistics-panel {
+            background: var(--card-bg);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: var(--card-shadow);
+            width: 90%;
+            max-width: 800px;
+        }
 
-.statistics-panel h3 {
-    color: var(--text-primary);
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-}
+        .statistics-panel h3 {
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
 
-.nikud-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1.5rem;
-}
+        .nikud-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
 
-.nikud-stat-item {
-    background: white;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    text-align: center;
-    transition: var(--transition);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
+        .nikud-stat-item {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
 
-.nikud-stat-item:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--card-shadow);
-}
+        .nikud-stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow);
+        }
 
-.nikud-symbol {
-    font-size: 2.5rem;
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-}
+        .nikud-symbol {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
 
-.nikud-name {
-    color: var(--text-secondary);
-    margin-bottom: 1rem;
-}
+        .nikud-name {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
 
-.nikud-progress {
-    height: 8px;
-    background: #e9ecef;
-    border-radius: 999px;
-    overflow: hidden;
-    margin: 0.5rem 0;
-}
+        .nikud-progress {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 999px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
 
-.nikud-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
-    transition: width 0.5s ease;
-}
+        .nikud-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            transition: width 0.5s ease;
+        }
 
-.settings-content {
-    width: 400px;
-}
+        .settings-content {
+            width: 400px;
+        }
 
-.settings-section {
-    margin-bottom: 2rem;
-}
+        .settings-section {
+            margin-bottom: 2rem;
+        }
 
-.preset-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
+        .preset-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
 
-.preset-btn {
-    flex: 1;
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    border: none;
-    background: var(--primary-light);
-    color: white;
-    cursor: pointer;
-    transition: var(--transition);
-}
+        .preset-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            border: none;
+            background: var(--primary-light);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
 
-.preset-btn:hover {
-    background: var(--primary-color);
-    transform: translateY(-2px);
-}
+        .preset-btn:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+        }
 
-.nikud-toggle {
-    display: grid;
-    grid-template-columns: auto 1fr 2fr;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    transition: var(--transition);
-}
+        .nikud-toggle {
+            display: grid;
+            grid-template-columns: auto 1fr 2fr;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            transition: var(--transition);
+        }
 
-.nikud-example {
-    font-size: 2rem;
-    color: var(--primary-color);
-}
+        .nikud-example {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
 
-.sound-toggle {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
+        .sound-toggle {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
 
-.volume-control {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
 
-.volume-control input[type="range"] {
-    flex: 1;
-}
+        .volume-control input[type="range"] {
+            flex: 1;
+        }
 
-/* Replace the existing success-stars related CSS with: */
-.letter-success {
-    animation: successScale 0.5s ease-out;
-}
+        /* Replace the existing success-stars related CSS with: */
+        .letter-success {
+            animation: successScale 0.5s ease-out;
+        }
 
-@keyframes successScale {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
+        @keyframes successScale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
 
-.settings-content {
-    width: 400px;
-    background: white;
-    padding: 2rem;
-}
+        .settings-content {
+            width: 400px;
+            background: white;
+            padding: 2rem;
+        }
 
-.settings-section {
-    margin-bottom: 2rem;
-    padding: 1rem;
-    border-radius: 1rem;
-    background: #f8f9fa;
-}
+        .settings-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border-radius: 1rem;
+            background: #f8f9fa;
+        }
 
-.settings-section h3 {
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
-    text-align: center;
-}
+        .settings-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            text-align: center;
+        }
 
-.preset-buttons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-}
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
 
-.preset-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1rem;
-    border-radius: 1rem;
-    border: none;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
+        .preset-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 1rem;
+            border: none;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
 
-.preset-btn .emoji {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-}
+        .preset-btn .emoji {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
 
-.preset-btn .text {
-    font-weight: bold;
-    margin-bottom: 0.25rem;
-}
+        .preset-btn .text {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
 
-.preset-btn small {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-}
+        .preset-btn small {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
 
-.preset-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
+        .preset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
 
-.nikud-toggles {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
+        .nikud-toggles {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
 
-.nikud-toggle {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    background: white;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
+        .nikud-toggle {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-.nikud-toggle:hover {
-    background: #f0f0f0;
-}
+        .nikud-toggle:hover {
+            background: #f0f0f0;
+        }
 
-.sound-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
+        .sound-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
 
-.volume-control {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-.volume-control input[type="range"] {
-    flex: 1;
-    height: 6px;
-    border-radius: 3px;
-    background: #e9ecef;
-}
+        .volume-control input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #e9ecef;
+        }
 
-.volume-icon {
-    font-size: 1.25rem;
-}
+        .volume-icon {
+            font-size: 1.25rem;
+        }
 
-.sound-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem;
-    background: white;
-    border-radius: 0.75rem;
-    cursor: pointer;
-}
+        .sound-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.75rem;
+            cursor: pointer;
+        }
 
+        /* Update the settings panel styles */
+        .settings-content {
+            width: 400px;
+            max-height: 80vh; /* Limit height to prevent overflow */
+            overflow-y: auto; /* Add scrolling if content is too long */
+            background: white;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            position: fixed; /* Change to fixed positioning */
+            top: 5rem; /* Position below the toggle button */
+            right: 1rem;
+        }
 
-/* Update the settings panel styles */
-.settings-content {
-    width: 400px;
-    max-height: 80vh; /* Limit height to prevent overflow */
-    overflow-y: auto; /* Add scrolling if content is too long */
-    background: white;
-    padding: 2rem;
-    border-radius: 1.5rem;
-    position: fixed; /* Change to fixed positioning */
-    top: 5rem; /* Position below the toggle button */
-    right: 1rem;
-}
+        .nikud-toggles {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr); /* Change to single column */
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
 
-.nikud-toggles {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr); /* Change to single column */
-    gap: 0.75rem;
-    margin-top: 1rem;
-}
+        .nikud-toggle {
+            display: grid;
+            grid-template-columns: auto auto 1fr;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-.nikud-toggle {
-    display: grid;
-    grid-template-columns: auto auto 1fr;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    background: white;
-    border-radius: 0.75rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
+        /* Update the preset-buttons styles */
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr;  /* Change to single column */
+            gap: 0.75rem;
+            width: 100%;
+        }
 
-/* Update the preset-buttons styles */
-.preset-buttons {
-    display: grid;
-    grid-template-columns: 1fr;  /* Change to single column */
-    gap: 0.75rem;
-    width: 100%;
-}
+        .preset-btn {
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            flex-direction: row;  /* Change to row layout */
+            align-items: center;
+            justify-content: flex-start;
+            gap: 1rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-.preset-btn {
-    width: 100%;
-    padding: 1rem;
-    display: flex;
-    flex-direction: row;  /* Change to row layout */
-    align-items: center;
-    justify-content: flex-start;
-    gap: 1rem;
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+        .preset-btn .emoji {
+            font-size: 2rem;
+            margin: 0;
+        }
 
-.preset-btn .emoji {
-    font-size: 2rem;
-    margin: 0;
-}
+        .preset-btn .text-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
 
-.preset-btn .text-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
+        .preset-btn .text {
+            font-weight: bold;
+            margin: 0;
+            color: var(--text-primary);
+        }
 
-.preset-btn .text {
-    font-weight: bold;
-    margin: 0;
-    color: var(--text-primary);
-}
-
-.preset-btn small {
-    color: var(--text-secondary);
-    margin-top: 0.25rem;
-}
-
-
-/* Add custom checkbox styles */
-.nikud-toggle {
-    background: white;
-    padding: 0.75rem 1rem;
-    border-radius: 1rem;
-    display: grid;
-    grid-template-columns: 2rem auto 1fr;
-    align-items: center;
-    gap: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-
-.nikud-toggle:hover {
-    border-color: var(--primary-light);
-    background: #f8f9fa;
-}
-
-.nikud-toggle input[type="checkbox"] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 1.5rem;
-    height: 1.5rem;
-    border: 2px solid var(--primary-light);
-    border-radius: 0.5rem;
-    position: relative;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.nikud-toggle input[type="checkbox"]:checked {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-}
-
-.nikud-toggle input[type="checkbox"]:checked::after {
-    content: '✓';
-    color: white;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1rem;
-}
-
-.nikud-example {
-    font-size: 2.5rem;
-    color: var(--primary-color);
-    width: 2.5rem;
-    text-align: center;
-}
-
-.nikud-name {
-    font-weight: 500;
-    color: var(--text-primary);
-}
+        .preset-btn small {
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
 
 
-/* Add this inside your existing <style> tag, after the existing .settings-content styles */
+        /* Add custom checkbox styles */
+        .nikud-toggle {
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            display: grid;
+            grid-template-columns: 2rem auto 1fr;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .nikud-toggle:hover {
+            border-color: var(--primary-light);
+            background: #f8f9fa;
+        }
+
+        .nikud-toggle input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid var(--primary-light);
+            border-radius: 0.5rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nikud-toggle input[type="checkbox"]:checked {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .nikud-toggle input[type="checkbox"]:checked::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1rem;
+        }
+
+        .nikud-example {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            width: 2.5rem;
+            text-align: center;
+        }
+
+        .nikud-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+
+        /* Add this inside your existing <style> tag, after the existing .settings-content styles */
 
     @media (max-width: 768px) {
     .settings-content {
@@ -990,13 +1484,211 @@
     .settings-toggle {
         font-size: 1rem;
     }
+
+    /* Level Panel Styles */
+    .level-panel {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        backdrop-filter: blur(20px);
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .level-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .level-header h2 {
+        margin: 0;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .level-select-button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .level-select-button:hover {
+        background: var(--primary-light);
+        transform: translateY(-2px);
+    }
+
+    .level-info p {
+        margin: 0 0 1rem 0;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .level-progress {
+        font-size: 1rem;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    /* Level Selector Modal */
+    .level-selector-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        backdrop-filter: blur(5px);
+    }
+
+    .level-selector-content {
+        background: var(--card-bg);
+        border-radius: 1rem;
+        padding: 2rem;
+        max-width: 800px;
+        max-height: 80vh;
+        width: 90%;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .level-selector-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--card-border);
+        padding-bottom: 1rem;
+    }
+
+    .level-selector-header h2 {
+        margin: 0;
+        color: var(--primary-color);
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        color: var(--text-secondary);
+        padding: 0;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+
+    .close-modal:hover {
+        background: var(--error-color);
+        color: white;
+    }
+
+    .levels-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .level-card {
+        background: var(--card-bg);
+        border: 2px solid var(--card-border);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .level-card.unlocked:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary-color);
+    }
+
+    .level-card.completed {
+        border-color: var(--success-color);
+        background: linear-gradient(135deg, var(--card-bg) 0%, rgba(107, 203, 119, 0.1) 100%);
+    }
+
+    .level-card.locked {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .level-icon {
+        font-size: 3rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .level-info h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+
+    .level-info p {
+        margin: 0 0 1rem 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .level-progress-bar {
+        background: var(--card-border);
+        border-radius: 1rem;
+        height: 0.5rem;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+        height: 100%;
+        border-radius: 1rem;
+        transition: width 0.3s ease;
+    }
+
+    .level-stats {
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .lock-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3rem;
+        opacity: 0.7;
+    }
 }
-}
+    }
     </style>
 </head>
 <body>
     <div id="display-area">
-        <div class="letter-display"></div>
+        <div class="letter-display">אֶאוֹ</div>
     </div>
 
      <!-- Add audio elements -->
@@ -1011,10 +1703,10 @@
     </audio>
 
     <!-- Add milestone display -->
-    <div id="streak-milestone" class="streak-milestone"></div>
+    <div id="streak-milestone" class="streak-milestone milestone-show">⭐ Incredible! ⭐</div>
 
     <!-- Add counter display -->
-    <div class="counter">אותיות שנלמדו: <span id="counter">0</span></div>
+    <div class="counter">אותיות שנלמדו: <span id="letters-count">52</span></div>
 
 
     
@@ -1023,9 +1715,24 @@
         <button class="incorrect-btn" onclick="window.gameHandlers.handleIncorrect()">✗ לא נכון</button>
     </div>
 
+    <!-- Level Information Panel -->
+    <div class="level-panel">
+        <div class="level-info">
+            <div class="level-header">
+                <h2 id="current-level-name">שתי תנועות פתוחות עם סגול וחולם מלא וחיריק וקובוץ ושורוק</h2>
+                <button id="level-select-btn" class="level-select-button">🎯 בחר רמה</button>
+            </div>
+            <p id="current-level-description">תרגול ממוקד עם סגול וחולם מלא וחיריק וקובוץ ושורוק (תמיד מתחיל ב-א) (כל השילובים)</p>
+            <div class="level-progress">
+                <span>התקדמות: </span>
+                <span id="level-progress">51/575 (9%)</span>
+            </div>
+        </div>
+    </div>
+
     <div class="streak-counter">
         <span>🔥</span>
-        <span id="streak">0</span>
+        <span id="streak" class="streak-highlight">52</span>
     </div>
 
     <div class="settings-panel">
@@ -1065,52 +1772,52 @@
                 <!-- Replace the nikud-toggles div content with this complete list -->
 <div class="nikud-toggles">
     <label class="nikud-toggle">
-        <input type="checkbox" checked data-nikud="Qamats">
+        <input type="checkbox" checked="" data-nikud="Qamats">
         <span class="nikud-example">בָּ</span>
         <span class="nikud-name">קמץ</span>
     </label>
     <label class="nikud-toggle">
-        <input type="checkbox" checked data-nikud="Patah">
+        <input type="checkbox" checked="" data-nikud="Patah">
         <span class="nikud-example">בַּ</span>
         <span class="nikud-name">פתח</span>
     </label>
     <label class="nikud-toggle">
-        <input type="checkbox" checked data-nikud="Hiriq">
+        <input type="checkbox" checked="" data-nikud="Hiriq">
         <span class="nikud-example">בִּ</span>
         <span class="nikud-name">חיריק</span>
     </label>
     <label class="nikud-toggle">
-        <input type="checkbox" checked data-nikud="Tsere">
+        <input type="checkbox" checked="" data-nikud="Tsere">
         <span class="nikud-example">בֵּ</span>
         <span class="nikud-name">צירה</span>
     </label>
     <label class="nikud-toggle">
-        <input type="checkbox" checked data-nikud="Segol">
+        <input type="checkbox" checked="" data-nikud="Segol">
         <span class="nikud-example">בֶּ</span>
         <span class="nikud-name">סגול</span>
     </label>
     <label class="nikud-toggle">
-        <input type="checkbox" checked data-nikud="Kubutz">
+        <input type="checkbox" checked="" data-nikud="Kubutz">
         <span class="nikud-example">בֻ</span>
         <span class="nikud-name">קובוץ</span>
     </label>
     <label class="nikud-toggle">
-        <input type="checkbox" checked data-nikud="Sheva">
+        <input type="checkbox" checked="" data-nikud="Sheva">
         <span class="nikud-example">בְּ</span>
         <span class="nikud-name">שווא</span>
     </label>
     <label class="nikud-toggle">
-        <input type="checkbox" checked data-nikud="Holam">
+        <input type="checkbox" checked="" data-nikud="Holam">
         <span class="nikud-example">בֹּ</span>
         <span class="nikud-name">חולם</span>
     </label>
     <label class="nikud-toggle">
-        <input type="checkbox" checked data-nikud="FullShuruk">
+        <input type="checkbox" checked="" data-nikud="FullShuruk">
         <span class="nikud-example">וּ</span>
         <span class="nikud-name">שורוק</span>
     </label>
     <label class="nikud-toggle">
-        <input type="checkbox" checked data-nikud="FullHolam">
+        <input type="checkbox" checked="" data-nikud="FullHolam">
         <span class="nikud-example">וֹ</span>
         <span class="nikud-name">חולם מלא</span>
     </label>
@@ -1122,7 +1829,7 @@
                 <h3>הגדרות צליל</h3>
                 <div class="sound-controls">
                     <label class="sound-toggle">
-                        <input type="checkbox" checked id="enableSounds">
+                        <input type="checkbox" checked="" id="enableSounds">
                         <span class="toggle-label">צלילים</span>
                         <span class="toggle-icon">🔊</span>
                     </label>
@@ -1135,12 +1842,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Add after the controls div -->
-<div class="statistics-panel">
-    <h3>התקדמות בלימוד</h3>
-    <div id="nikud-stats" class="nikud-stats-grid"></div>
-</div>
 
     <script type="module" src="./dist/index.js"></script>
     <script>
@@ -1161,5 +1862,36 @@
             });
         });
     </script>
-</body>
-</html>
+<!-- Code injected by live-server -->
+<script type="text/javascript">
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function() {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					head.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					head.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function(msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			console.log('Live reload enabled.');
+		})();
+	}
+	// ]]>
+</script>
+
+</body></html>

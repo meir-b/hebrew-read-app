@@ -1,5 +1,6 @@
 import { Statistics } from '../models/Statistics.js';
-import { HebrewLetterGenerator, CharectorNikud, NIKUD_LIST } from '../utils/letterUtils.js';
+import { LevelManager } from '../models/LevelManager.js';
+import { HebrewLetterGenerator, LevelAwareGenerator, CharectorNikud, NIKUD_LIST } from '../utils/letterUtils.js';
 
 interface NikudInfo {
     nikud: string;
@@ -13,14 +14,16 @@ interface WeightMap {
 class HebrewLetterDisplay {
     private currentLetter: CharectorNikud;
     private readonly statistics: Statistics;
+    private readonly levelManager: LevelManager;
     
     // Constants
     private static readonly DIFFICULTY_THRESHOLD = 0.6;
     private static readonly MIN_EXPOSURE_COUNT = 5;
 
-    constructor(statistics: Statistics) {
+    constructor(statistics: Statistics, levelManager: LevelManager) {
         this.statistics = statistics;
-        this.currentLetter = HebrewLetterGenerator.generateNextCharacter();
+        this.levelManager = levelManager;
+        this.currentLetter = this.generateLevelAwareLetter();
     }
 
     public getNikudList(): readonly NikudInfo[] {
@@ -36,42 +39,15 @@ class HebrewLetterDisplay {
         return found ? found.name : "Unknown Nikud";
     }
 
+    private generateLevelAwareLetter(): CharectorNikud {
+        const config = this.levelManager.getLevelConfig();
+        return LevelAwareGenerator.generateForLevel(config);
+    }
+
     public updateDisplayedLetter(): void {
-        const weights = this.calculateNikudWeights();
-        console.log("weights:", weights);
-        this.currentLetter = HebrewLetterGenerator.generateNextCharacter(weights);
+        this.currentLetter = this.generateLevelAwareLetter();
         this.render();
     }
-
-    private calculateNikudWeights(): WeightMap {
-        const performance = this.statistics.calculateOverallPerformance();
-        console.log("performance:", performance);
-
-        const weights: WeightMap = {};
-        
-        const leastPracticedNikud = this.findLeastPracticedNikud();
-        console.log("leastPracticedNikud:", leastPracticedNikud);
-        
-        return weights;
-    }
-
-
-   
-
-    private findLeastPracticedNikud(): string | null {
-        const nikudCounts = NIKUD_LIST.map(n => ({
-            nikud: n.nikud,
-            total: this.statistics.getStatistics(n.nikud)?.total ?? 0
-        }));
-
-        const leastPracticed = nikudCounts
-            .filter(n => n.total < HebrewLetterDisplay.MIN_EXPOSURE_COUNT)
-            .sort((a, b) => a.total - b.total)[0];
-
-        return leastPracticed?.nikud ?? null;
-    }
-
-
 
     private render(): void {
         const letterElement = document.querySelector<HTMLElement>('.letter-display');
